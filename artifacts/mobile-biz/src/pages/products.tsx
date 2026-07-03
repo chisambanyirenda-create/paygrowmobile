@@ -1,8 +1,8 @@
 import { Layout } from "@/components/layout";
-import { 
-  useListProducts, 
-  useCreateProduct, 
-  useUpdateProduct, 
+import {
+  useListProducts,
+  useCreateProduct,
+  useUpdateProduct,
   useDeleteProduct,
   useListSuppliers,
   getListProductsQueryKey,
@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Edit, Trash2, Box, BookOpen, X, ChevronRight, Smartphone } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Box, BookOpen, X, ChevronRight, Smartphone, ArrowLeft, HardDrive, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,34 +24,65 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { phoneCatalog, catalogBrands, CatalogPhone } from "@/data/phone-catalog";
+import { phoneCatalog, catalogBrands, CatalogPhone, StorageVariant } from "@/data/phone-catalog";
 
-// ─── Brand accent colours ───────────────────────────────────────────────────
-const brandColor: Record<string, string> = {
-  Apple:    "border-gray-400/30 bg-gray-400/5 text-gray-300",
-  Samsung:  "border-blue-400/30 bg-blue-400/5 text-blue-300",
-  OPPO:     "border-green-400/30 bg-green-400/5 text-green-300",
-  Huawei:   "border-red-400/30 bg-red-400/5 text-red-300",
-  Google:   "border-yellow-400/30 bg-yellow-400/5 text-yellow-300",
-  Tecno:    "border-cyan-400/30 bg-cyan-400/5 text-cyan-300",
-  Infinix:  "border-purple-400/30 bg-purple-400/5 text-purple-300",
-  Xiaomi:   "border-orange-400/30 bg-orange-400/5 text-orange-300",
-  Realme:   "border-yellow-300/30 bg-yellow-300/5 text-yellow-200",
-  OnePlus:  "border-red-500/30 bg-red-500/5 text-red-400",
-  Motorola: "border-indigo-400/30 bg-indigo-400/5 text-indigo-300",
-  Nokia:    "border-blue-300/30 bg-blue-300/5 text-blue-200",
+// ─── Brand theme map ──────────────────────────────────────────────────────────
+const brandTheme: Record<string, { border: string; bg: string; text: string; glow: string; fallbackBg: string }> = {
+  Apple:    { border:"border-slate-400/25",   bg:"bg-slate-400/5",   text:"text-slate-200",   glow:"shadow-slate-400/10",  fallbackBg:"from-slate-700 to-slate-900" },
+  Samsung:  { border:"border-blue-400/25",    bg:"bg-blue-400/5",    text:"text-blue-200",    glow:"shadow-blue-400/10",   fallbackBg:"from-blue-800 to-blue-950" },
+  OPPO:     { border:"border-emerald-400/25", bg:"bg-emerald-400/5", text:"text-emerald-200", glow:"shadow-emerald-400/10",fallbackBg:"from-emerald-800 to-emerald-950" },
+  Huawei:   { border:"border-red-400/25",     bg:"bg-red-400/5",     text:"text-red-200",     glow:"shadow-red-400/10",    fallbackBg:"from-red-800 to-red-950" },
+  Google:   { border:"border-yellow-400/25",  bg:"bg-yellow-400/5",  text:"text-yellow-200",  glow:"shadow-yellow-400/10", fallbackBg:"from-yellow-700 to-yellow-950" },
+  Tecno:    { border:"border-cyan-400/25",    bg:"bg-cyan-400/5",    text:"text-cyan-200",    glow:"shadow-cyan-400/10",   fallbackBg:"from-cyan-800 to-cyan-950" },
+  Infinix:  { border:"border-purple-400/25",  bg:"bg-purple-400/5",  text:"text-purple-200",  glow:"shadow-purple-400/10", fallbackBg:"from-purple-800 to-purple-950" },
+  Xiaomi:   { border:"border-orange-400/25",  bg:"bg-orange-400/5",  text:"text-orange-200",  glow:"shadow-orange-400/10", fallbackBg:"from-orange-800 to-orange-950" },
+  Realme:   { border:"border-amber-400/25",   bg:"bg-amber-400/5",   text:"text-amber-200",   glow:"shadow-amber-400/10",  fallbackBg:"from-amber-700 to-amber-950" },
+  OnePlus:  { border:"border-red-500/25",     bg:"bg-red-500/5",     text:"text-red-300",     glow:"shadow-red-500/10",    fallbackBg:"from-red-700 to-red-950" },
+  Motorola: { border:"border-indigo-400/25",  bg:"bg-indigo-400/5",  text:"text-indigo-200",  glow:"shadow-indigo-400/10", fallbackBg:"from-indigo-800 to-indigo-950" },
+  Nokia:    { border:"border-sky-400/25",     bg:"bg-sky-400/5",     text:"text-sky-200",     glow:"shadow-sky-400/10",    fallbackBg:"from-sky-800 to-sky-950" },
 };
 const brandEmoji: Record<string, string> = {
-  Apple: "🍎", Samsung: "📱", OPPO: "🟢", Huawei: "📡",
-  Google: "🔵", Tecno: "🌟", Infinix: "⚡", Xiaomi: "🔶",
-  Realme: "🔷", OnePlus: "🔴", Motorola: "〽️", Nokia: "🏔️",
+  Apple:"🍎", Samsung:"📱", OPPO:"🟢", Huawei:"📡", Google:"🔵",
+  Tecno:"🌟", Infinix:"⚡", Xiaomi:"🔶", Realme:"💎", OnePlus:"🔴",
+  Motorola:"〽️", Nokia:"🏔️",
 };
+const defaultTheme = { border:"border-white/10", bg:"bg-white/[0.02]", text:"text-white/80", glow:"shadow-white/5", fallbackBg:"from-gray-800 to-gray-950" };
+
+// ─── Phone image with branded fallback ───────────────────────────────────────
+function PhoneImage({ phone, className }: { phone: CatalogPhone; className?: string }) {
+  const [failed, setFailed] = useState(false);
+  const theme = brandTheme[phone.brand] ?? defaultTheme;
+  if (failed) {
+    return (
+      <div className={cn(`bg-gradient-to-b ${theme.fallbackBg} flex flex-col items-center justify-center gap-1`, className)}>
+        <span className="text-2xl">{brandEmoji[phone.brand] ?? "📱"}</span>
+        <span className="text-[9px] text-white/40 font-bold uppercase tracking-wider leading-tight text-center px-1">{phone.brand}</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={phone.imageUrl}
+      alt={phone.name}
+      className={cn("object-contain bg-black/40", className)}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 // ─── Phone Catalog Dialog ─────────────────────────────────────────────────────
-function PhoneCatalogDialog({ onSelect }: { onSelect: (phone: CatalogPhone) => void }) {
+interface CatalogSelection {
+  phone: CatalogPhone;
+  variant: StorageVariant;
+}
+
+function PhoneCatalogDialog({ onSelect }: { onSelect: (sel: CatalogSelection) => void }) {
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState<"browse" | "storage">("browse");
   const [catalogSearch, setCatalogSearch] = useState("");
   const [activeBrand, setActiveBrand] = useState("All");
+  const [pickedPhone, setPickedPhone] = useState<CatalogPhone | null>(null);
+  const [pickedVariant, setPickedVariant] = useState<StorageVariant | null>(null);
 
   const filtered = useMemo(() => {
     const q = catalogSearch.toLowerCase().trim();
@@ -62,127 +93,262 @@ function PhoneCatalogDialog({ onSelect }: { onSelect: (phone: CatalogPhone) => v
     });
   }, [catalogSearch, activeBrand]);
 
-  const handlePick = (phone: CatalogPhone) => {
-    onSelect(phone);
-    setOpen(false);
+  const reset = () => {
+    setStep("browse");
     setCatalogSearch("");
     setActiveBrand("All");
+    setPickedPhone(null);
+    setPickedVariant(null);
   };
 
+  const handlePhonePick = (phone: CatalogPhone) => {
+    setPickedPhone(phone);
+    setPickedVariant(phone.storageVariants[0]);
+    setStep("storage");
+  };
+
+  const handleConfirm = () => {
+    if (!pickedPhone || !pickedVariant) return;
+    onSelect({ phone: pickedPhone, variant: pickedVariant });
+    setOpen(false);
+    reset();
+  };
+
+  const theme = pickedPhone ? (brandTheme[pickedPhone.brand] ?? defaultTheme) : defaultTheme;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
       <DialogTrigger asChild>
         <Button variant="outline" className="border-primary/40 text-primary hover:bg-primary/10 font-bold tracking-wide">
           <BookOpen className="w-4 h-4 mr-2" /> Phone Catalog
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col bg-card border-border/50 p-0 gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-white/[0.05] flex-shrink-0">
-          <DialogTitle className="text-xl text-white flex items-center gap-2">
-            <Smartphone className="w-5 h-5 text-primary" />
-            Phone Catalog
-            <span className="text-sm font-normal text-muted-foreground ml-1">— {phoneCatalog.length} models</span>
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            Pick a phone to pre-fill the product form. You'll only need to enter your prices.
-          </p>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[92vh] flex flex-col bg-[#070f1e] border-white/[0.08] p-0 gap-0">
 
-        {/* Search bar */}
-        <div className="px-6 py-4 border-b border-white/[0.05] flex-shrink-0">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              autoFocus
-              placeholder="Search by model, e.g. iPhone 14 Pro, Galaxy S23, Spark 10..."
-              className="pl-9 bg-background/60 border-white/10 text-sm h-11"
-              value={catalogSearch}
-              onChange={e => setCatalogSearch(e.target.value)}
-            />
-            {catalogSearch && (
-              <button onClick={() => setCatalogSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white">
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
+        {/* ── Step 1: Browse phones ── */}
+        {step === "browse" && (
+          <>
+            <DialogHeader className="px-6 pt-5 pb-4 border-b border-white/[0.05] flex-shrink-0">
+              <DialogTitle className="text-xl text-white flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-primary" />
+                Phone Catalog
+                <span className="text-sm font-normal text-muted-foreground ml-1">— {phoneCatalog.length} models</span>
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground mt-1">Search for a phone, click it, then choose storage.</p>
+            </DialogHeader>
 
-        {/* Brand filter strip */}
-        <div className="px-6 py-3 border-b border-white/[0.05] flex-shrink-0 overflow-x-auto">
-          <div className="flex gap-2 min-w-max">
-            {catalogBrands.map(brand => (
-              <button
-                key={brand}
-                onClick={() => setActiveBrand(brand)}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-bold border transition-all whitespace-nowrap",
-                  activeBrand === brand
-                    ? "bg-primary text-primary-foreground border-primary shadow-[0_0_12px_-2px] shadow-primary/40"
-                    : "border-white/10 text-muted-foreground hover:text-white hover:border-white/20 bg-white/[0.02]"
+            {/* Search */}
+            <div className="px-6 py-3 border-b border-white/[0.05] flex-shrink-0">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  autoFocus
+                  placeholder="Search — e.g. iPhone 14 Pro, Galaxy S23, Spark 10…"
+                  className="pl-9 bg-black/30 border-white/10 text-sm h-10"
+                  value={catalogSearch}
+                  onChange={e => setCatalogSearch(e.target.value)}
+                />
+                {catalogSearch && (
+                  <button onClick={() => setCatalogSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white">
+                    <X className="w-4 h-4" />
+                  </button>
                 )}
-              >
-                {brand !== "All" && (brandEmoji[brand] ?? "📱")} {brand}
-                {brand !== "All" && (
-                  <span className="ml-1 opacity-60 font-mono">
-                    {phoneCatalog.filter(p => p.brand === brand).length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Results count */}
-        <div className="px-6 pt-3 pb-1 flex-shrink-0">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
-            {filtered.length} model{filtered.length !== 1 ? "s" : ""} found
-          </p>
-        </div>
-
-        {/* Phone grid */}
-        <div className="overflow-y-auto flex-1 px-6 pb-6">
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
-              <Smartphone className="w-12 h-12 opacity-20" />
-              <p className="text-base">No phones found for "{catalogSearch}"</p>
-              <button onClick={() => { setCatalogSearch(""); setActiveBrand("All"); }} className="text-xs text-primary hover:underline">Clear search</button>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
-              {filtered.map(phone => (
-                <button
-                  key={phone.id}
-                  onClick={() => handlePick(phone)}
-                  className={cn(
-                    "group flex items-center gap-3 p-3 rounded-xl border text-left transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]",
-                    brandColor[phone.brand] ?? "border-white/10 bg-white/[0.02] text-white/80",
-                    "hover:brightness-125"
-                  )}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-black/30 flex items-center justify-center text-base flex-shrink-0">
-                    {brandEmoji[phone.brand] ?? "📱"}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-white text-sm leading-tight truncate">{phone.model}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{phone.brand}</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-60 flex-shrink-0 transition-opacity" />
+
+            {/* Brand tabs */}
+            <div className="px-6 py-3 border-b border-white/[0.05] flex-shrink-0 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-2 min-w-max">
+                {catalogBrands.map(brand => {
+                  const t = brand !== "All" ? (brandTheme[brand] ?? defaultTheme) : defaultTheme;
+                  const count = brand === "All" ? phoneCatalog.length : phoneCatalog.filter(p => p.brand === brand).length;
+                  return (
+                    <button
+                      key={brand}
+                      onClick={() => setActiveBrand(brand)}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all whitespace-nowrap",
+                        activeBrand === brand
+                          ? "bg-primary text-primary-foreground border-primary shadow-[0_0_14px_-3px] shadow-primary/50"
+                          : `border-white/10 text-muted-foreground hover:text-white hover:border-white/20 bg-white/[0.02]`
+                      )}
+                    >
+                      {brand !== "All" && <span>{brandEmoji[brand] ?? "📱"}</span>}
+                      {brand}
+                      <span className={cn("font-mono opacity-50", activeBrand === brand ? "opacity-80" : "")}>{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Results count */}
+            <div className="px-6 pt-3 pb-0 flex-shrink-0">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+                {filtered.length} model{filtered.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+
+            {/* Phone grid */}
+            <div className="overflow-y-auto flex-1 px-6 pb-6 pt-3">
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+                  <Smartphone className="w-12 h-12 opacity-20" />
+                  <p>No phones found for "{catalogSearch}"</p>
+                  <button onClick={() => { setCatalogSearch(""); setActiveBrand("All"); }} className="text-xs text-primary hover:underline">Clear search</button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {filtered.map(phone => {
+                    const t = brandTheme[phone.brand] ?? defaultTheme;
+                    return (
+                      <button
+                        key={phone.id}
+                        onClick={() => handlePhonePick(phone)}
+                        className={cn(
+                          "group flex flex-col rounded-2xl border overflow-hidden text-left transition-all duration-200",
+                          "hover:scale-[1.03] hover:shadow-xl active:scale-[0.98]",
+                          t.border, t.bg, t.glow
+                        )}
+                      >
+                        {/* Phone image */}
+                        <div className="w-full aspect-[4/3] overflow-hidden relative bg-black/40">
+                          <PhoneImage phone={phone} className="w-full h-full" />
+                          {/* Storage badge */}
+                          <div className="absolute bottom-1 right-1 flex gap-1 flex-wrap justify-end">
+                            {phone.storageVariants.slice(0, 3).map(v => (
+                              <span key={v.storage} className="text-[9px] font-bold bg-black/70 text-white/70 rounded px-1 py-0.5 leading-none">
+                                {v.storage}
+                              </span>
+                            ))}
+                            {phone.storageVariants.length > 3 && (
+                              <span className="text-[9px] font-bold bg-black/70 text-white/50 rounded px-1 py-0.5 leading-none">+{phone.storageVariants.length - 3}</span>
+                            )}
+                          </div>
+                        </div>
+                        {/* Info */}
+                        <div className="px-2.5 py-2 flex items-start justify-between gap-1">
+                          <div className="min-w-0">
+                            <p className="font-bold text-white text-xs leading-tight truncate">{phone.model}</p>
+                            <p className={cn("text-[10px] mt-0.5 truncate", t.text)}>{phone.brand}</p>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5 opacity-0 group-hover:opacity-80 transition-opacity" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* ── Step 2: Pick storage ── */}
+        {step === "storage" && pickedPhone && (
+          <>
+            <DialogHeader className="px-6 pt-5 pb-4 border-b border-white/[0.05] flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setStep("browse")} className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-white transition-colors flex-shrink-0">
+                  <ArrowLeft className="w-4 h-4" />
                 </button>
-              ))}
+                <DialogTitle className="text-xl text-white">Choose Storage</DialogTitle>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 ml-11">Select the GB variant you are adding to inventory.</p>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6">
+              {/* Phone hero card */}
+              <div className={cn("flex items-center gap-5 p-5 rounded-2xl border", theme.border, theme.bg)}>
+                <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-black/50">
+                  <PhoneImage phone={pickedPhone} className="w-full h-full" />
+                </div>
+                <div>
+                  <p className={cn("text-xs font-bold uppercase tracking-widest mb-1", theme.text)}>{pickedPhone.brand}</p>
+                  <p className="text-2xl font-black text-white leading-tight">{pickedPhone.model}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{pickedPhone.storageVariants.length} storage option{pickedPhone.storageVariants.length > 1 ? "s" : ""} available</p>
+                </div>
+              </div>
+
+              {/* Storage options */}
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-3 flex items-center gap-2">
+                  <HardDrive className="w-3.5 h-3.5" /> Storage Variants
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {pickedPhone.storageVariants.map((variant, i) => {
+                    const isSelected = pickedVariant?.storage === variant.storage;
+                    return (
+                      <button
+                        key={variant.storage}
+                        onClick={() => setPickedVariant(variant)}
+                        className={cn(
+                          "relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200",
+                          isSelected
+                            ? "border-primary bg-primary/10 shadow-[0_0_20px_-4px] shadow-primary/30 scale-[1.03]"
+                            : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]"
+                        )}
+                      >
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="w-3 h-3 text-primary-foreground" />
+                          </div>
+                        )}
+                        <HardDrive className={cn("w-6 h-6 mb-2", isSelected ? "text-primary" : "text-muted-foreground")} />
+                        <span className={cn("text-lg font-black font-mono", isSelected ? "text-white" : "text-white/70")}>{variant.storage}</span>
+                        {variant.priceAdder > 0 ? (
+                          <span className="text-[10px] text-emerald-400 font-bold mt-1">+{formatZMW(variant.priceAdder)}</span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground mt-1">Base price</span>
+                        )}
+                        {i === 0 && <span className="text-[9px] text-primary/60 font-bold uppercase tracking-wider mt-0.5">Entry</span>}
+                        {i === pickedPhone.storageVariants.length - 1 && i > 0 && <span className="text-[9px] text-[#ffcc00]/60 font-bold uppercase tracking-wider mt-0.5">Top</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Price info */}
+                {pickedVariant && (
+                  <div className="mt-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] text-sm text-muted-foreground">
+                    <p className="font-medium text-white/80">
+                      <span className="text-primary">{pickedPhone.model} — {pickedVariant.storage}</span> will be added to your inventory.
+                    </p>
+                    <p className="text-xs mt-1">
+                      {pickedVariant.priceAdder > 0
+                        ? `Add ${formatZMW(pickedVariant.priceAdder)} to your base cost & selling price for this variant.`
+                        : "Enter your base cost and selling price in the next step."}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Confirm footer */}
+            <div className="px-6 py-4 border-t border-white/[0.05] flex-shrink-0 flex justify-between items-center">
+              <Button variant="ghost" onClick={() => setStep("browse")} className="text-muted-foreground">
+                <ArrowLeft className="w-4 h-4 mr-2" /> Back
+              </Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={!pickedVariant}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-8"
+              >
+                Add to Inventory →
+              </Button>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
 }
 
-// ─── Product form schema ─────────────────────────────────────────────────────
+// ─── Product form schema ──────────────────────────────────────────────────────
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   sku: z.string().optional(),
-  category: z.string().min(1, "Category is required"),
+  category: z.string().min(1),
   brand: z.string().optional(),
   model: z.string().optional(),
   costPrice: z.coerce.number().min(0),
@@ -194,104 +360,135 @@ const productSchema = z.object({
 type ProductFormValues = z.infer<typeof productSchema>;
 
 // ─── Shared product form fields ───────────────────────────────────────────────
-function ProductFormFields({ form, suppliers }: { form: ReturnType<typeof useForm<ProductFormValues>>; suppliers: { id: number; name: string }[] | undefined }) {
+function ProductFormFields({
+  form,
+  suppliers,
+  catalogPhone,
+}: {
+  form: ReturnType<typeof useForm<ProductFormValues>>;
+  suppliers: { id: number; name: string }[] | undefined;
+  catalogPhone?: { phone: CatalogPhone; variant: StorageVariant } | null;
+}) {
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <FormField control={form.control} name="name" render={({ field }) => (
-        <FormItem className="col-span-2">
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Product Name *</FormLabel>
-          <FormControl><Input {...field} placeholder="e.g. Apple iPhone 15 Pro Max" className="bg-background" /></FormControl>
-          <FormMessage />
-        </FormItem>
-      )} />
+    <div className="space-y-4">
+      {/* Catalog photo banner */}
+      {catalogPhone && (
+        <div className="flex items-center gap-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.07]">
+          <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-black/50">
+            <PhoneImage phone={catalogPhone.phone} className="w-full h-full" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">{catalogPhone.phone.brand}</p>
+            <p className="text-base font-black text-white truncate">{catalogPhone.phone.model}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-bold">
+                {catalogPhone.variant.storage}
+              </Badge>
+              {catalogPhone.variant.priceAdder > 0 && (
+                <span className="text-[11px] text-emerald-400 font-bold">+{formatZMW(catalogPhone.variant.priceAdder)} vs base</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
-      <FormField control={form.control} name="category" render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Category *</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
-            <FormControl><SelectTrigger className="bg-background"><SelectValue placeholder="Select category" /></SelectTrigger></FormControl>
-            <SelectContent>
-              <SelectItem value="phones">Phones</SelectItem>
-              <SelectItem value="accessories">Accessories</SelectItem>
-              <SelectItem value="tablets">Tablets</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )} />
+      <div className="grid grid-cols-2 gap-4">
+        <FormField control={form.control} name="name" render={({ field }) => (
+          <FormItem className="col-span-2">
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Product Name *</FormLabel>
+            <FormControl><Input {...field} placeholder="e.g. Apple iPhone 15 Pro — 256GB" className="bg-background" /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
-      <FormField control={form.control} name="sku" render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">SKU / Barcode</FormLabel>
-          <FormControl><Input {...field} placeholder="Optional" className="bg-background" /></FormControl>
-          <FormMessage />
-        </FormItem>
-      )} />
+        <FormField control={form.control} name="category" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Category *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl><SelectTrigger className="bg-background"><SelectValue /></SelectTrigger></FormControl>
+              <SelectContent>
+                <SelectItem value="phones">Phones</SelectItem>
+                <SelectItem value="accessories">Accessories</SelectItem>
+                <SelectItem value="tablets">Tablets</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )} />
 
-      <FormField control={form.control} name="brand" render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Brand</FormLabel>
-          <FormControl><Input {...field} placeholder="Apple, Samsung…" className="bg-background" /></FormControl>
-          <FormMessage />
-        </FormItem>
-      )} />
+        <FormField control={form.control} name="sku" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">SKU / Barcode</FormLabel>
+            <FormControl><Input {...field} placeholder="Optional" className="bg-background" /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
-      <FormField control={form.control} name="model" render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Model</FormLabel>
-          <FormControl><Input {...field} placeholder="Optional" className="bg-background" /></FormControl>
-          <FormMessage />
-        </FormItem>
-      )} />
+        <FormField control={form.control} name="brand" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Brand</FormLabel>
+            <FormControl><Input {...field} placeholder="Apple, Samsung…" className="bg-background" /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
-      <FormField control={form.control} name="costPrice" render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Cost Price (ZMW) *</FormLabel>
-          <FormControl><Input type="number" step="0.01" {...field} className="bg-background font-mono" /></FormControl>
-          <FormMessage />
-        </FormItem>
-      )} />
+        <FormField control={form.control} name="model" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Model</FormLabel>
+            <FormControl><Input {...field} placeholder="Optional" className="bg-background" /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
-      <FormField control={form.control} name="sellingPrice" render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Selling Price (ZMW) *</FormLabel>
-          <FormControl><Input type="number" step="0.01" {...field} className="bg-background font-mono" /></FormControl>
-          <FormMessage />
-        </FormItem>
-      )} />
+        <FormField control={form.control} name="costPrice" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Cost Price (ZMW) *</FormLabel>
+            <FormControl><Input type="number" step="0.01" {...field} className="bg-background font-mono" /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
-      <FormField control={form.control} name="stockQuantity" render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Initial Stock *</FormLabel>
-          <FormControl><Input type="number" {...field} className="bg-background font-mono" /></FormControl>
-          <FormMessage />
-        </FormItem>
-      )} />
+        <FormField control={form.control} name="sellingPrice" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Selling Price (ZMW) *</FormLabel>
+            <FormControl><Input type="number" step="0.01" {...field} className="bg-background font-mono" /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
-      <FormField control={form.control} name="lowStockThreshold" render={({ field }) => (
-        <FormItem>
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Low Stock Alert At *</FormLabel>
-          <FormControl><Input type="number" {...field} className="bg-background font-mono" /></FormControl>
-          <FormMessage />
-        </FormItem>
-      )} />
+        <FormField control={form.control} name="stockQuantity" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Initial Stock *</FormLabel>
+            <FormControl><Input type="number" {...field} className="bg-background font-mono" /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
 
-      <FormField control={form.control} name="supplierId" render={({ field }) => (
-        <FormItem className="col-span-2">
-          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Supplier (Optional)</FormLabel>
-          <Select onValueChange={(v) => field.onChange(v === "none" ? undefined : Number(v))} value={field.value?.toString() || "none"}>
-            <FormControl><SelectTrigger className="bg-background"><SelectValue placeholder="Select supplier" /></SelectTrigger></FormControl>
-            <SelectContent>
-              <SelectItem value="none">None</SelectItem>
-              {suppliers?.map(s => (
-                <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )} />
+        <FormField control={form.control} name="lowStockThreshold" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Low Stock Alert At *</FormLabel>
+            <FormControl><Input type="number" {...field} className="bg-background font-mono" /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+
+        <FormField control={form.control} name="supplierId" render={({ field }) => (
+          <FormItem className="col-span-2">
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Supplier (Optional)</FormLabel>
+            <Select onValueChange={(v) => field.onChange(v === "none" ? undefined : Number(v))} value={field.value?.toString() || "none"}>
+              <FormControl><SelectTrigger className="bg-background"><SelectValue placeholder="Select supplier" /></SelectTrigger></FormControl>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {suppliers?.map(s => (
+                  <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )} />
+      </div>
     </div>
   );
 }
@@ -302,48 +499,44 @@ export default function Products() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  // When a catalog phone is picked, store it to show the banner
-  const [catalogSource, setCatalogSource] = useState<string | null>(null);
+  const [catalogSel, setCatalogSel] = useState<CatalogSelection | null>(null);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: products, isLoading } = useListProducts({ 
-    search: search || undefined, 
-    category: categoryFilter !== "all" ? categoryFilter : undefined 
+  const { data: products, isLoading } = useListProducts({
+    search: search || undefined,
+    category: categoryFilter !== "all" ? categoryFilter : undefined,
   });
   const { data: suppliers } = useListSuppliers();
-
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: {
-      name: "", sku: "", category: "phones", brand: "", model: "",
-      costPrice: 0, sellingPrice: 0, stockQuantity: 0, lowStockThreshold: 3,
-    }
+    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, stockQuantity:0, lowStockThreshold:3 },
   });
-
   const editForm = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: {
-      name: "", sku: "", category: "phones", brand: "", model: "",
-      costPrice: 0, sellingPrice: 0, stockQuantity: 0, lowStockThreshold: 3,
-    }
+    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, stockQuantity:0, lowStockThreshold:3 },
   });
 
-  // Called when user picks a phone from the catalog
-  const handleCatalogSelect = (phone: CatalogPhone) => {
+  // Catalog phone → pre-fill form + open dialog
+  const handleCatalogSelect = (sel: CatalogSelection) => {
+    const { phone, variant } = sel;
     form.reset({
-      name: phone.name,
+      name: `${phone.name} — ${variant.storage}`,
       brand: phone.brand,
       model: phone.model,
       category: "phones",
-      sku: "", costPrice: 0, sellingPrice: 0, stockQuantity: 0, lowStockThreshold: 3,
+      sku: "",
+      costPrice: variant.priceAdder,       // suggested base = price adder as hint
+      sellingPrice: variant.priceAdder,
+      stockQuantity: 0,
+      lowStockThreshold: 3,
     });
-    setCatalogSource(phone.name);
+    setCatalogSel(sel);
     setIsCreateOpen(true);
   };
 
@@ -352,10 +545,10 @@ export default function Products() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
         setIsCreateOpen(false);
-        setCatalogSource(null);
+        setCatalogSel(null);
         form.reset();
         toast({ title: "Product added to inventory ✓" });
-      }
+      },
     });
   };
 
@@ -366,7 +559,7 @@ export default function Products() {
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
         setEditingProduct(null);
         toast({ title: "Product updated ✓" });
-      }
+      },
     });
   };
 
@@ -387,7 +580,7 @@ export default function Products() {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
           toast({ title: "Product deleted" });
-        }
+        },
       });
     }
   };
@@ -396,45 +589,33 @@ export default function Products() {
     <Layout>
       <div className="flex flex-col gap-6 max-w-7xl mx-auto page-enter">
 
-        {/* Header row */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-white relative inline-block">
               Inventory
-              <span className="absolute -bottom-2 left-0 h-px bg-gradient-to-r from-primary/60 to-transparent w-32"></span>
+              <span className="absolute -bottom-2 left-0 h-px bg-gradient-to-r from-primary/60 to-transparent w-32" />
             </h2>
             <p className="text-muted-foreground mt-3 text-sm">Manage your products, pricing, and stock levels.</p>
           </div>
           <div className="flex gap-3 flex-wrap">
-            {/* Catalog picker */}
             <PhoneCatalogDialog onSelect={handleCatalogSelect} />
 
-            {/* Manual add */}
-            <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if (!open) { setCatalogSource(null); form.reset(); } }}>
+            <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if (!open) { setCatalogSel(null); form.reset(); } }}>
               <DialogTrigger asChild>
-                <Button onClick={() => { form.reset(); setCatalogSource(null); }} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold tracking-wide">
+                <Button onClick={() => { form.reset(); setCatalogSel(null); }} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold tracking-wide">
                   <Plus className="w-4 h-4 mr-2" /> Add Product
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-card border-border/50">
                 <DialogHeader>
-                  <DialogTitle className="text-xl text-white">
-                    {catalogSource ? "Add from Catalog" : "Add New Product"}
-                  </DialogTitle>
+                  <DialogTitle className="text-xl text-white">{catalogSel ? "Add from Catalog" : "Add New Product"}</DialogTitle>
                 </DialogHeader>
-                {/* Catalog source banner */}
-                {catalogSource && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 text-sm text-primary mt-1">
-                    <Smartphone className="w-4 h-4 flex-shrink-0" />
-                    <span className="font-medium truncate">{catalogSource}</span>
-                    <span className="text-muted-foreground text-xs ml-auto">— just enter your prices below</span>
-                  </div>
-                )}
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onCreateSubmit)} className="space-y-4 mt-2">
-                    <ProductFormFields form={form} suppliers={suppliers} />
+                    <ProductFormFields form={form} suppliers={suppliers} catalogPhone={catalogSel} />
                     <div className="flex justify-end gap-3 pt-6 border-t border-border mt-6">
-                      <Button type="button" variant="outline" onClick={() => { setIsCreateOpen(false); setCatalogSource(null); }}>Cancel</Button>
+                      <Button type="button" variant="outline" onClick={() => { setIsCreateOpen(false); setCatalogSel(null); }}>Cancel</Button>
                       <Button type="submit" disabled={createProduct.isPending} className="font-bold">
                         {createProduct.isPending ? "Adding…" : "Add to Inventory"}
                       </Button>
@@ -466,7 +647,7 @@ export default function Products() {
           </DialogContent>
         </Dialog>
 
-        {/* 3-Stat Summary Bar */}
+        {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
           <div className="glass-panel p-5 rounded-2xl flex flex-col items-center justify-center text-center border-0 bg-card/60">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Total SKUs</span>
@@ -493,8 +674,8 @@ export default function Products() {
           <div className="p-4 border-b border-white/[0.05] flex flex-col sm:flex-row gap-4 justify-between items-center bg-black/20">
             <div className="relative w-full sm:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search products, SKU, or brand…" 
+              <Input
+                placeholder="Search products, SKU, or brand…"
                 className="pl-9 bg-background/50 border-white/10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -502,9 +683,7 @@ export default function Products() {
             </div>
             <div className="w-full sm:w-48">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="bg-background/50 border-white/10">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
+                <SelectTrigger className="bg-background/50 border-white/10"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="phones">Phones</SelectItem>
@@ -533,22 +712,18 @@ export default function Products() {
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i} className="border-b border-white/[0.02]">
-                      <TableCell><Skeleton className="h-10 w-full bg-white/[0.02]" /></TableCell>
-                      <TableCell><Skeleton className="h-6 w-20 bg-white/[0.02]" /></TableCell>
-                      <TableCell><Skeleton className="h-6 w-24 ml-auto bg-white/[0.02]" /></TableCell>
-                      <TableCell><Skeleton className="h-6 w-24 ml-auto bg-white/[0.02]" /></TableCell>
-                      <TableCell><Skeleton className="h-6 w-24 ml-auto bg-white/[0.02]" /></TableCell>
-                      <TableCell><Skeleton className="h-6 w-16 mx-auto bg-white/[0.02]" /></TableCell>
-                      <TableCell><Skeleton className="h-8 w-16 bg-white/[0.02]" /></TableCell>
+                      {Array.from({ length: 7 }).map((_, j) => (
+                        <TableCell key={j}><Skeleton className="h-8 w-full bg-white/[0.02]" /></TableCell>
+                      ))}
                     </TableRow>
                   ))
                 ) : products?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-20 text-muted-foreground">
-                      <div className="flex flex-col items-center justify-center gap-4">
+                    <TableCell colSpan={7} className="text-center py-20">
+                      <div className="flex flex-col items-center gap-4 text-muted-foreground">
                         <Box className="w-16 h-16 opacity-30 text-primary" />
                         <p className="text-lg font-medium text-white/50">No products found.</p>
-                        <Button variant="outline" className="mt-2" onClick={() => { setSearch(""); setCategoryFilter("all"); }}>Clear Filters</Button>
+                        <Button variant="outline" onClick={() => { setSearch(""); setCategoryFilter("all"); }}>Clear Filters</Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -580,7 +755,7 @@ export default function Products() {
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] text-muted-foreground font-mono">{marginPercent.toFixed(1)}%</span>
                               <div className="w-12 h-1 bg-black/40 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-[#ffcc00] to-orange-400" style={{ width: `${Math.min(100, marginPercent)}%` }}></div>
+                                <div className="h-full bg-gradient-to-r from-[#ffcc00] to-orange-400" style={{ width: `${Math.min(100, marginPercent)}%` }} />
                               </div>
                             </div>
                           </div>
