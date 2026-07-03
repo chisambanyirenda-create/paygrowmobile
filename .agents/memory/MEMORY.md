@@ -1,0 +1,2 @@
+- [MobiTrack stack decisions](mobitrack-stack.md) — OpenAPI-first codegen, ZMW currency, transactional sales, dark mode always-on
+- [Progress component indicatorColor](progress-indicatorcolor.md) — radix Progress needs custom prop extension; the base component ignores unknown props

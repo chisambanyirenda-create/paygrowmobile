@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "MobiTrack — Phone & Accessory Business"
+version = "1.0.0"
+id = "artifacts/mobile-biz"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24144
+
+[services.development]
+run = "pnpm --filter @workspace/mobile-biz run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mobile-biz", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/mobile-biz/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24144"
+BASE_PATH = "/"
