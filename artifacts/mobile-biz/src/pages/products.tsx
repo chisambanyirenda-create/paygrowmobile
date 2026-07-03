@@ -48,10 +48,35 @@ const brandEmoji: Record<string, string> = {
 };
 const defaultTheme = { border:"border-white/10", bg:"bg-white/[0.02]", text:"text-white/80", glow:"shadow-white/5", fallbackBg:"from-gray-800 to-gray-950" };
 
+// ─── Local AI-generated phone images ─────────────────────────────────────────
+function getLocalPhoneImage(brand: string, model: string): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  if (brand === "Samsung") {
+    if (model.startsWith("Galaxy Z")) return `${base}/phones/samsung-z.jpg`;
+    if (model.startsWith("Galaxy A")) return `${base}/phones/samsung-a.jpg`;
+    return `${base}/phones/samsung-s.jpg`;
+  }
+  const map: Record<string, string> = {
+    Apple:    `${base}/phones/apple.jpg`,
+    OPPO:     `${base}/phones/oppo.jpg`,
+    Huawei:   `${base}/phones/huawei.jpg`,
+    Google:   `${base}/phones/google.jpg`,
+    Tecno:    `${base}/phones/tecno.jpg`,
+    Infinix:  `${base}/phones/infinix.jpg`,
+    Xiaomi:   `${base}/phones/xiaomi.jpg`,
+    Realme:   `${base}/phones/realme.jpg`,
+    OnePlus:  `${base}/phones/oneplus.jpg`,
+    Motorola: `${base}/phones/motorola.jpg`,
+    Nokia:    `${base}/phones/nokia.jpg`,
+  };
+  return map[brand] ?? `${base}/phones/samsung-s.jpg`;
+}
+
 // ─── Phone image with branded fallback ───────────────────────────────────────
 function PhoneImage({ phone, className }: { phone: CatalogPhone; className?: string }) {
   const [failed, setFailed] = useState(false);
   const theme = brandTheme[phone.brand] ?? defaultTheme;
+  const src = getLocalPhoneImage(phone.brand, phone.model);
   if (failed) {
     return (
       <div className={cn(`bg-gradient-to-b ${theme.fallbackBg} flex flex-col items-center justify-center gap-1`, className)}>
@@ -62,7 +87,7 @@ function PhoneImage({ phone, className }: { phone: CatalogPhone; className?: str
   }
   return (
     <img
-      src={phone.imageUrl}
+      src={src}
       alt={phone.name}
       className={cn("object-contain bg-black/40", className)}
       onError={() => setFailed(true)}
