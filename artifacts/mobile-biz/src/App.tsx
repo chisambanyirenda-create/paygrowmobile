@@ -10,6 +10,7 @@ import Expenses from '@/pages/expenses';
 import Suppliers from '@/pages/suppliers';
 import Reports from '@/pages/reports';
 import Settings from '@/pages/settings';
+import AIAdvisor from '@/pages/ai-advisor';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 
 const queryClient = new QueryClient({
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/expenses" component={Expenses} />
       <Route path="/suppliers" component={Suppliers} />
       <Route path="/reports" component={Reports} />
+      <Route path="/ai-advisor" component={AIAdvisor} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>

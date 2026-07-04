@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Edit, Trash2, Box, BookOpen, X, ChevronRight, Smartphone, ArrowLeft, HardDrive, Check } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Box, BookOpen, X, ChevronRight, Smartphone, ArrowLeft, HardDrive, Check, Headphones } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -25,6 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { phoneCatalog, catalogBrands, CatalogPhone, StorageVariant } from "@/data/phone-catalog";
+import { accessoriesCatalog, accessoryCategories, CatalogAccessory, AccessoryVariant } from "@/data/accessories-catalog";
 
 // ─── Brand theme map ──────────────────────────────────────────────────────────
 const brandTheme: Record<string, { border: string; bg: string; text: string; glow: string; fallbackBg: string }> = {
@@ -92,6 +93,197 @@ function PhoneImage({ phone, className }: { phone: CatalogPhone; className?: str
       className={cn("object-contain bg-black/40", className)}
       onError={() => setFailed(true)}
     />
+  );
+}
+
+// ─── Accessories Catalog Dialog ──────────────────────────────────────────────
+interface AccCatalogSelection {
+  accessory: CatalogAccessory;
+  variant: AccessoryVariant;
+}
+
+function AccessoriesCatalogDialog({ onSelect }: { onSelect: (sel: AccCatalogSelection) => void }) {
+  const [open, setOpen] = useState(false);
+  const [accSearch, setAccSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [picked, setPicked] = useState<CatalogAccessory | null>(null);
+  const [pickedVariant, setPickedVariant] = useState<AccessoryVariant | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = accSearch.toLowerCase().trim();
+    return accessoriesCatalog.filter(a => {
+      const matchCat = activeCategory === "All" || a.category === activeCategory;
+      const matchQ = !q || a.name.toLowerCase().includes(q) || a.category.toLowerCase().includes(q) || a.subcategory.toLowerCase().includes(q);
+      return matchCat && matchQ;
+    });
+  }, [accSearch, activeCategory]);
+
+  const reset = () => { setAccSearch(""); setActiveCategory("All"); setPicked(null); setPickedVariant(null); };
+
+  const handleConfirm = () => {
+    if (!picked || !pickedVariant) return;
+    onSelect({ accessory: picked, variant: pickedVariant });
+    setOpen(false);
+    reset();
+  };
+
+  const cats = ["All", ...accessoryCategories];
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="border-amber-500/40 text-amber-400 hover:bg-amber-500/10 font-bold tracking-wide">
+          <Headphones className="w-4 h-4 mr-2" /> Acc. Catalog
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="max-w-3xl max-h-[92vh] flex flex-col bg-[#070f1e] border-white/[0.08] p-0 gap-0">
+        {!picked ? (
+          <>
+            <DialogHeader className="px-6 pt-5 pb-4 border-b border-white/[0.05] flex-shrink-0">
+              <DialogTitle className="text-xl text-white flex items-center gap-2">
+                <Headphones className="w-5 h-5 text-amber-400" />
+                Accessories Catalog
+                <span className="text-sm font-normal text-muted-foreground ml-1">— {accessoriesCatalog.length} items</span>
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground mt-1">Pick an accessory and choose a variant to pre-fill the Add Product form.</p>
+            </DialogHeader>
+
+            {/* Search */}
+            <div className="px-6 py-3 border-b border-white/[0.05] flex-shrink-0">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  autoFocus
+                  placeholder="Search — e.g. Case, Charger, Earphones…"
+                  className="pl-9 bg-black/30 border-white/10 text-sm h-10"
+                  value={accSearch}
+                  onChange={e => setAccSearch(e.target.value)}
+                />
+                {accSearch && (
+                  <button onClick={() => setAccSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Category tabs */}
+            <div className="px-6 py-3 border-b border-white/[0.05] flex-shrink-0 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-2 min-w-max">
+                {cats.map(cat => {
+                  const count = cat === "All" ? accessoriesCatalog.length : accessoriesCatalog.filter(a => a.category === cat).length;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all whitespace-nowrap",
+                        activeCategory === cat
+                          ? "bg-amber-500 text-black border-amber-500 shadow-[0_0_14px_-3px] shadow-amber-500/50"
+                          : "border-white/10 text-muted-foreground hover:text-white hover:border-white/20 bg-white/[0.02]"
+                      )}
+                    >
+                      {cat}
+                      <span className={cn("font-mono opacity-50", activeCategory === cat ? "opacity-80" : "")}>{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="px-6 pt-3 pb-1 flex-shrink-0">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{filtered.length} item{filtered.length !== 1 ? "s" : ""}</p>
+            </div>
+
+            {/* Grid */}
+            <div className="overflow-y-auto flex-1 px-6 pb-6 pt-2">
+              {filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+                  <Headphones className="w-12 h-12 opacity-20" />
+                  <p>No accessories found</p>
+                  <button onClick={() => { setAccSearch(""); setActiveCategory("All"); }} className="text-xs text-amber-400 hover:underline">Clear search</button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {filtered.map(acc => (
+                    <button
+                      key={acc.id}
+                      onClick={() => { setPicked(acc); setPickedVariant(acc.variants[0]); }}
+                      className="group flex flex-col rounded-2xl border border-white/[0.07] bg-white/[0.02] hover:border-amber-500/40 hover:bg-amber-500/5 overflow-hidden text-left transition-all duration-200 hover:scale-[1.03] hover:shadow-xl"
+                    >
+                      <div className="w-full aspect-[4/3] overflow-hidden bg-black/40">
+                        <img src={acc.imageUrl} alt={acc.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                      </div>
+                      <div className="px-2.5 py-2">
+                        <p className="font-bold text-white text-xs leading-tight truncate">{acc.name}</p>
+                        <p className="text-[10px] text-amber-400/80 mt-0.5 truncate">{acc.subcategory}</p>
+                        <p className="text-[9px] text-muted-foreground mt-0.5">{acc.variants.length} variant{acc.variants.length !== 1 ? "s" : ""}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          /* Variant picker */
+          <>
+            <DialogHeader className="px-6 pt-5 pb-4 border-b border-white/[0.05] flex-shrink-0">
+              <DialogTitle className="text-xl text-white flex items-center gap-2">
+                <button onClick={() => { setPicked(null); setPickedVariant(null); }} className="text-muted-foreground hover:text-white">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                Choose Variant
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground mt-1">{picked.name} · {picked.subcategory}</p>
+            </DialogHeader>
+
+            <div className="px-6 py-6 flex-1 overflow-y-auto">
+              <div className="flex gap-5">
+                {/* Image */}
+                <div className="w-32 h-32 rounded-xl overflow-hidden bg-black/40 flex-shrink-0 border border-white/[0.07]">
+                  <img src={picked.imageUrl} alt={picked.name} className="w-full h-full object-cover" />
+                </div>
+                {/* Variants */}
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-3">Select variant</p>
+                  <div className="flex flex-wrap gap-2">
+                    {picked.variants.map(v => (
+                      <button
+                        key={v.label}
+                        onClick={() => setPickedVariant(v)}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-bold transition-all",
+                          pickedVariant?.label === v.label
+                            ? "border-amber-500 bg-amber-500/10 text-amber-400"
+                            : "border-white/10 bg-white/[0.02] text-muted-foreground hover:border-white/20 hover:text-white"
+                        )}
+                      >
+                        {pickedVariant?.label === v.label && <Check className="w-3.5 h-3.5" />}
+                        {v.label}
+                        {v.priceAdder > 0 && <span className="text-xs opacity-60">+{v.priceAdder}</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-white/[0.05]">
+              <Button variant="outline" onClick={() => { setPicked(null); setPickedVariant(null); }}>Back</Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={!pickedVariant}
+                className="bg-amber-500 hover:bg-amber-400 text-black font-black"
+              >
+                Use This <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -525,6 +717,7 @@ export default function Products() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [catalogSel, setCatalogSel] = useState<CatalogSelection | null>(null);
+  const [accCatalogSel, setAccCatalogSel] = useState<AccCatalogSelection | null>(null);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -546,6 +739,25 @@ export default function Products() {
     resolver: zodResolver(productSchema),
     defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, stockQuantity:0, lowStockThreshold:3 },
   });
+
+  // Accessories Catalog → pre-fill form + open dialog
+  const handleAccCatalogSelect = (sel: AccCatalogSelection) => {
+    const { accessory, variant } = sel;
+    form.reset({
+      name: `${accessory.name}${variant.label !== "Standard" ? ` — ${variant.label}` : ""}`,
+      brand: "",
+      model: "",
+      category: "accessories",
+      sku: "",
+      costPrice: variant.priceAdder,
+      sellingPrice: variant.priceAdder,
+      stockQuantity: 0,
+      lowStockThreshold: 5,
+    });
+    setAccCatalogSel(sel);
+    setCatalogSel(null);
+    setIsCreateOpen(true);
+  };
 
   // Catalog phone → pre-fill form + open dialog
   const handleCatalogSelect = (sel: CatalogSelection) => {
@@ -571,6 +783,7 @@ export default function Products() {
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
         setIsCreateOpen(false);
         setCatalogSel(null);
+        setAccCatalogSel(null);
         form.reset();
         toast({ title: "Product added to inventory ✓" });
       },
@@ -624,23 +837,26 @@ export default function Products() {
             <p className="text-muted-foreground mt-3 text-sm">Manage your products, pricing, and stock levels.</p>
           </div>
           <div className="flex gap-3 flex-wrap">
+            <AccessoriesCatalogDialog onSelect={handleAccCatalogSelect} />
             <PhoneCatalogDialog onSelect={handleCatalogSelect} />
 
-            <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if (!open) { setCatalogSel(null); form.reset(); } }}>
+            <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if (!open) { setCatalogSel(null); setAccCatalogSel(null); form.reset(); } }}>
               <DialogTrigger asChild>
-                <Button onClick={() => { form.reset(); setCatalogSel(null); }} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold tracking-wide">
+                <Button onClick={() => { form.reset(); setCatalogSel(null); setAccCatalogSel(null); }} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold tracking-wide">
                   <Plus className="w-4 h-4 mr-2" /> Add Product
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-card border-border/50">
                 <DialogHeader>
-                  <DialogTitle className="text-xl text-white">{catalogSel ? "Add from Catalog" : "Add New Product"}</DialogTitle>
+                  <DialogTitle className="text-xl text-white">
+                    {catalogSel ? "Add Phone from Catalog" : accCatalogSel ? "Add Accessory from Catalog" : "Add New Product"}
+                  </DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onCreateSubmit)} className="space-y-4 mt-2">
                     <ProductFormFields form={form} suppliers={suppliers} catalogPhone={catalogSel} />
                     <div className="flex justify-end gap-3 pt-6 border-t border-border mt-6">
-                      <Button type="button" variant="outline" onClick={() => { setIsCreateOpen(false); setCatalogSel(null); }}>Cancel</Button>
+                      <Button type="button" variant="outline" onClick={() => { setIsCreateOpen(false); setCatalogSel(null); setAccCatalogSel(null); }}>Cancel</Button>
                       <Button type="submit" disabled={createProduct.isPending} className="font-bold">
                         {createProduct.isPending ? "Adding…" : "Add to Inventory"}
                       </Button>

@@ -9,6 +9,7 @@ import {
   Truck, 
   BarChart3,
   Settings,
+  BrainCircuit,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useGetLowStockProducts } from "@workspace/api-client-react";
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/expenses", label: "Expenses", icon: Receipt },
   { href: "/suppliers", label: "Suppliers", icon: Truck },
   { href: "/reports", label: "Reports", icon: BarChart3 },
+  { href: "/ai-advisor", label: "AI Advisor", icon: BrainCircuit },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
