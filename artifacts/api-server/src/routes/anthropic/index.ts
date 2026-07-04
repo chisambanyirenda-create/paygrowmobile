@@ -10,13 +10,12 @@ import {
   customersTable,
 } from "@workspace/db";
 import { eq, desc, gte, sql } from "drizzle-orm";
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 
 const router = Router();
 
-// Use own API key directly (not Replit integration)
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 // ─── Build rich business context for the AI ───────────────────────────────────
@@ -237,31 +236,8 @@ router.post("/conversations/:id/messages", async (req, res) => {
   // Build business context
   const businessContext = await buildBusinessContext();
 
-  // Build chat messages for Claude
-  const chatMessages = history.map((m) => ({
-    role: m.role as "user" | "assistant",
-    content: m.content,
-  }));
-
-  // SSE headers
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  res.setHeader("Access-Control-Allow-Origin", "*");
-
-  let fullResponse = "";
-  let cancelled = false;
-
-  // Cancel Anthropic stream if client disconnects
-  req.on("close", () => {
-    cancelled = true;
-  });
-
-  try {
-    const stream = anthropic.messages.stream({
-      model: "claude-sonnet-4-6",
-      max_tokens: 8192,
-      system: `You are Mia, the dedicated AI Business Advisor for MobiTrack — a phone and mobile accessories shop based in Zambia. You are embedded inside the MobiTrack business management system.
+  // Build messages for Groq (OpenAI-compatible format)
+  const systemPrompt = `You are Mia, the dedicated AI Business Advisor for MobiTrack — a phone and mobile accessories shop based in Zambia. You are embedded inside the MobiTrack business management system.
 
 Your role is to be the owner's trusted business partner. You have real-time access to the shop's complete business data (sales, inventory, customers, expenses, profit/loss). Use this data to give specific, data-driven answers and recommendations — never generic advice.
 
@@ -284,23 +260,43 @@ PERSONALITY & STYLE:
 - Be specific: say "Your Galaxy A15 made K 500 profit this month" not "some phones do well"
 - Use Zambian Kwacha (K) for all currency amounts
 - Keep answers clear and actionable — no fluff
-- If asked to chart or visualize data, describe the chart clearly in text (the UI will render charts separately)
 - When you spot a concern in the data, proactively flag it even if not directly asked
 
-You can answer ANY business question. You are the smartest business mind in the room.`,
+You can answer ANY business question. You are the smartest business mind in the room.`;
+
+  const chatMessages: Groq.Chat.ChatCompletionMessageParam[] = [
+    { role: "system", content: systemPrompt },
+    ...history.map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    })),
+  ];
+
+  // SSE headers
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  let fullResponse = "";
+  let cancelled = false;
+
+  req.on("close", () => { cancelled = true; });
+
+  try {
+    const stream = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       messages: chatMessages,
+      stream: true,
+      max_tokens: 8192,
     });
 
-    for await (const event of stream) {
+    for await (const chunk of stream) {
       if (cancelled) break;
-      if (
-        event.type === "content_block_delta" &&
-        event.delta.type === "text_delta"
-      ) {
-        fullResponse += event.delta.text;
-        res.write(
-          `data: ${JSON.stringify({ content: event.delta.text })}\n\n`
-        );
+      const text = chunk.choices[0]?.delta?.content ?? "";
+      if (text) {
+        fullResponse += text;
+        res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
       }
     }
 
@@ -314,10 +310,8 @@ You can answer ANY business question. You are the smartest business mind in the 
     res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
     res.end();
   } catch (err: unknown) {
-    console.error("Anthropic stream error:", err);
-    res.write(
-      `data: ${JSON.stringify({ error: "AI error — please try again." })}\n\n`
-    );
+    console.error("Groq stream error:", err);
+    res.write(`data: ${JSON.stringify({ error: "AI error — please try again." })}\n\n`);
     res.end();
   }
 });
