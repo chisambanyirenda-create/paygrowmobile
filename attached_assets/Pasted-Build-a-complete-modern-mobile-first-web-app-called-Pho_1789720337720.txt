@@ -1,0 +1,1057 @@
+Build a complete, modern mobile-first web app called Phone Business Manager for managing a small phone-reselling business in Zambia.
+
+The app should be designed for a single business owner who buys smartphones, mainly iPhones, imports them, pays shipping, sells them locally, and wants to track inventory, costs, sales, profit, cash flow, and business growth without using pen and paper.
+
+1. Main goal
+
+The app must make it extremely easy for me to:
+
+1. Add phones I purchase.
+2. Track every phone individually.
+3. Automatically calculate the true landed cost of each phone.
+4. Track phones currently in stock.
+5. Record sales.
+6. Automatically calculate gross profit.
+7. Track business capital separately from profit.
+8. Track expenses such as shipping, repairs, transport and accessories.
+9. See how much money is available for buying more stock.
+10. Track progress from 5 phones → 10 → 20 → 50 phones.
+11. View useful business statistics from a dashboard.
+12. Avoid accidentally spending money that is required to replace my inventory.
+
+The app should use Zambian Kwacha (ZMW/K) as the default currency.
+
+⸻
+
+2. Design
+
+Create a clean, premium-looking interface.
+
+The design should feel like a professional business-management app rather than a spreadsheet.
+
+Use:
+
+* Mobile-first responsive design.
+* Large readable numbers.
+* Simple navigation.
+* Cards for important statistics.
+* Clear buttons.
+* Modern typography.
+* Light and dark mode if practical.
+* Professional spacing and animations, but don’t overdo animations.
+* Use icons where appropriate.
+* Make it easy to operate with one hand on an iPhone.
+
+The dashboard should immediately show the most important financial information.
+
+⸻
+
+3. Navigation
+
+Create a bottom navigation bar on mobile with:
+
+1. Dashboard
+2. Inventory
+3. Sales
+4. Money
+5. More
+
+On desktop, this can become a sidebar.
+
+⸻
+
+4. Dashboard
+
+The Dashboard is the home screen.
+
+Show these cards:
+
+Business Capital
+
+Money currently available to operate the business.
+
+Stock Cost
+
+Total amount invested in phones currently in inventory.
+
+Stock Value
+
+The expected selling value of phones currently in inventory.
+
+Potential Profit
+
+Expected selling value minus total landed cost of unsold phones.
+
+Cash Available
+
+Current business cash balance.
+
+Total Profit
+
+Total realized gross profit from completed sales.
+
+Phones in Stock
+
+Number of unsold phones.
+
+Phones Sold
+
+Number of phones sold.
+
+⸻
+
+Dashboard example
+
+If I have:
+
+* 2 iPhone X
+* 3 iPhone 11
+* Total landed cost = K10,212
+* Expected revenue = K17,400
+
+The dashboard should be capable of showing approximately:
+
+Phones in stock: 5
+
+Stock cost: K10,212
+
+Potential revenue: K17,400
+
+Potential profit: K7,188
+
+Do not hard-code these numbers. They are only examples. All numbers must be calculated from the database.
+
+⸻
+
+5. Inventory
+
+Create an Inventory screen showing all phones.
+
+Each phone should have its own inventory record.
+
+Display:
+
+* Model
+* Storage
+* Condition
+* Color
+* IMEI/serial number
+* Purchase price
+* Shipping cost
+* Repair cost
+* Accessories cost
+* Other costs
+* Total landed cost
+* Expected selling price
+* Expected profit
+* Status
+* Purchase date
+* Sale date if sold
+
+Inventory statuses:
+
+* In Stock
+* Reserved
+* Sold
+* Repair
+* Returned
+
+⸻
+
+6. Add Phone
+
+Create a simple “Add Phone” form.
+
+Fields:
+
+Phone information
+
+* Brand
+* Model
+* Storage
+* Color
+* Condition
+* IMEI/serial number
+* Battery health
+* Notes
+
+Purchase information
+
+* Purchase price
+* Shipping cost
+* Customs/import cost
+* Repair cost
+* Accessories cost
+* Other costs
+
+Selling information
+
+* Expected selling price
+
+Dates
+
+* Purchase date
+
+The app must automatically calculate:
+
+Total Landed Cost = Purchase Price + Shipping + Customs + Repairs + Accessories + Other Costs
+
+Then:
+
+Expected Profit = Expected Selling Price − Total Landed Cost
+
+And:
+
+Expected Profit Margin = Expected Profit ÷ Expected Selling Price × 100
+
+Do not allow incorrect negative calculations without warning.
+
+⸻
+
+7. Shipping allocation
+
+Shipping may sometimes apply to an entire batch rather than one phone.
+
+Create a feature for recording a shipment/batch.
+
+Example:
+
+I buy 5 phones and pay K1,000 shipping for the entire batch.
+
+The app should allow me to enter:
+
+Batch shipping = K1,000
+
+Then allocate that K1,000 across the phones.
+
+Default method:
+
+Shipping per phone = Total shipping ÷ Number of phones
+
+For 5 phones:
+
+K1,000 ÷ 5 = K200 per phone.
+
+Then each phone’s landed cost includes its K200 shipping allocation.
+
+Allow the user to manually adjust the allocation if needed.
+
+⸻
+
+8. Batch purchases
+
+Create a “Purchase Batch” feature.
+
+A batch should contain:
+
+* Batch name/ID
+* Purchase date
+* Supplier
+* Total shipping
+* Customs
+* Number of phones
+* Phones in the batch
+* Total purchase cost
+* Total landed cost
+
+Example:
+
+Batch #001
+
+5 phones
+
+Purchase cost: K9,212
+
+Shipping: K1,000
+
+Total landed cost: K10,212
+
+The app should automatically calculate:
+
+Average landed cost per phone = K10,212 ÷ 5 = K2,042.40
+
+Again, do not hard-code this example.
+
+⸻
+
+9. Sales
+
+Create a Sales screen.
+
+Show:
+
+* Phone sold
+* Sale price
+* Total landed cost
+* Gross profit
+* Profit margin
+* Customer name (optional)
+* Customer phone number (optional)
+* Payment method
+* Sale date
+* Notes
+
+Payment methods:
+
+* Cash
+* Mobile Money
+* Bank
+* Other
+
+When a phone is sold, automatically change its inventory status to:
+
+Sold
+
+Do not allow the same phone to be sold twice.
+
+⸻
+
+10. Sale calculation
+
+When selling a phone:
+
+Gross Profit = Sale Price − Total Landed Cost
+
+Example:
+
+iPhone 11
+
+Sale price: K4,000
+
+Landed cost: K2,042
+
+Gross profit: K1,958
+
+The actual database values must be used.
+
+If the sale price is lower than the landed cost, clearly show:
+
+LOSS
+
+and the loss amount.
+
+⸻
+
+11. Expenses
+
+Create an Expenses section.
+
+Allow me to record:
+
+* Shipping
+* Transport
+* Repairs
+* Packaging
+* Advertising
+* Accessories
+* Customs
+* Airtime/data
+* Other
+
+Fields:
+
+* Expense category
+* Amount
+* Date
+* Description
+* Related phone/batch (optional)
+
+Expenses related directly to acquiring a phone should be included in that phone’s landed cost.
+
+General business expenses should be tracked separately.
+
+This distinction is important.
+
+⸻
+
+12. Business money system
+
+Create a Money screen.
+
+Separate the financial information into:
+
+Stock Capital
+
+Money needed to replace inventory.
+
+Realized Profit
+
+Profit earned from phones already sold.
+
+Business Expenses
+
+Money spent operating the business.
+
+Personal Withdrawals
+
+Money taken out of the business for personal use.
+
+Available Cash
+
+Actual cash currently available in the business.
+
+The app should not call all cash “profit.”
+
+⸻
+
+13. Capital protection
+
+Create a useful warning system.
+
+Calculate:
+
+Required Replacement Capital
+
+This is the amount needed to replace the phones currently sold or maintain the desired inventory level.
+
+If the user tries to record a personal withdrawal that would reduce available cash below the required business capital, show a warning.
+
+Example:
+
+⚠️ Careful
+This withdrawal may reduce your business below the capital needed to replace your current inventory.
+
+Allow the user to continue after confirmation.
+
+Do not automatically block the transaction unless the user chooses that setting.
+
+⸻
+
+14. Growth tracker
+
+Create a dedicated “Growth” section.
+
+Track these milestones:
+
+Stage 1
+
+5 Phones
+
+Stage 2
+
+10 Phones
+
+Stage 3
+
+20 Phones
+
+Stage 4
+
+50 Phones
+
+Show:
+
+* Current phones in stock
+* Current business capital
+* Current stock value
+* Next target
+* Capital needed for next target
+* Progress percentage
+
+Example:
+
+If current stock target is 5 and I currently have 5:
+
+5 / 5 phones
+
+Then show:
+
+Target reached ✓
+
+Next target:
+
+10 phones
+
+Do not assume that having more phones is always better. Show the numbers and let the owner decide when to expand.
+
+⸻
+
+15. Reinvestment calculator
+
+Create a Reinvestment screen.
+
+Allow the user to enter:
+
+* Current business cash
+* Average landed cost per phone
+* Desired number of phones
+* Current number of phones
+* Amount of profit they want to withdraw
+
+Then calculate:
+
+* How many phones they can afford
+* How much additional capital is required
+* Remaining cash
+* Estimated stock cost
+* Estimated potential revenue
+* Estimated potential profit
+
+Example:
+
+If average landed cost is K2,042 and I have K20,000:
+
+The app should calculate approximately how many phones I can purchase without exceeding the available stock capital.
+
+⸻
+
+16. Profit analytics
+
+Create an Analytics screen.
+
+Show:
+
+* Total revenue
+* Total gross profit
+* Average profit per phone
+* Average selling price
+* Average landed cost
+* Profit margin
+* Number of phones sold
+* Number of phones purchased
+* Total expenses
+* Total personal withdrawals
+
+Allow filtering by:
+
+* Today
+* This week
+* This month
+* This year
+* Custom date range
+
+⸻
+
+17. Model performance
+
+Show which phone models are generating the most profit.
+
+For example:
+
+iPhone X
+
+Units sold: 2
+
+Revenue: K5,400
+
+Profit: calculated dynamically
+
+iPhone 11
+
+Units sold: 3
+
+Revenue: K12,000
+
+Profit: calculated dynamically
+
+Do not rank models based on assumptions. Rank them only using actual recorded business data.
+
+⸻
+
+18. Inventory alerts
+
+Create useful alerts.
+
+Examples:
+
+Low stock
+
+“You have only 2 phones remaining.”
+
+Unsold inventory
+
+“This phone has been in stock for 30 days.”
+
+Low-margin phone
+
+“This phone’s expected profit margin is below your chosen target.”
+
+Shipping not finalized
+
+“Shipping cost has not yet been allocated.”
+
+Potential loss
+
+“Your expected selling price is below landed cost.”
+
+Allow the user to customize alert thresholds.
+
+⸻
+
+19. Search and filters
+
+Inventory should have:
+
+* Search
+* Model filter
+* Status filter
+* Condition filter
+* Price filter
+* Date filter
+
+Make searching fast.
+
+Example:
+
+Search “iPhone 11”
+
+should show all iPhone 11 inventory records.
+
+⸻
+
+20. Phone details page
+
+Clicking a phone should open a detailed page.
+
+Show:
+
+iPhone 11
+
+IMEI: XXXXX
+
+Purchase price: K____
+
+Shipping: K____
+
+Repairs: K____
+
+Other costs: K____
+
+Total landed cost: K____
+
+Expected sale: K____
+
+Expected profit: K____
+
+Status: In Stock
+
+Purchase date: ______
+
+Include buttons:
+
+Edit
+
+Sell
+
+Mark for Repair
+
+Delete
+
+Do not permanently delete financial records without confirmation.
+
+⸻
+
+21. Data persistence
+
+All information must persist after closing and reopening the app.
+
+Use a proper database rather than temporary browser state.
+
+The database should contain at least:
+
+Phones
+
+* id
+* batch_id
+* brand
+* model
+* storage
+* color
+* condition
+* imei
+* battery_health
+* purchase_price
+* shipping_cost
+* customs_cost
+* repair_cost
+* accessories_cost
+* other_cost
+* landed_cost
+* expected_sale_price
+* status
+* purchase_date
+* sale_date
+* notes
+
+Batches
+
+* id
+* batch_name
+* supplier
+* purchase_date
+* shipping_total
+* customs_total
+* total_purchase_cost
+* total_landed_cost
+
+Sales
+
+* id
+* phone_id
+* sale_price
+* payment_method
+* customer_name
+* customer_phone
+* sale_date
+* profit
+* notes
+
+Expenses
+
+* id
+* category
+* amount
+* date
+* description
+* phone_id
+* batch_id
+
+Withdrawals
+
+* id
+* amount
+* date
+* reason
+
+Settings
+
+* currency
+* profit target
+* inventory target
+* alert settings
+
+⸻
+
+22. Dashboard calculations
+
+All dashboard calculations must come from database records.
+
+Never hard-code business numbers.
+
+At minimum calculate:
+
+Total inventory cost
+
+= Sum of landed costs of all unsold phones.
+
+Potential revenue
+
+= Sum of expected selling prices of all unsold phones.
+
+Potential profit
+
+= Potential revenue − inventory cost.
+
+Total revenue
+
+= Sum of completed sales.
+
+Realized gross profit
+
+= Sum of actual sale price − landed cost for sold phones.
+
+Total expenses
+
+= Sum of recorded business expenses.
+
+Personal withdrawals
+
+= Sum of withdrawals.
+
+⸻
+
+23. Data integrity
+
+This is extremely important.
+
+The app must:
+
+* Prevent duplicate phone IDs/IMEIs where appropriate.
+* Prevent selling a phone twice.
+* Recalculate profits if purchase costs are edited.
+* Keep financial calculations consistent.
+* Confirm destructive actions.
+* Validate money fields.
+* Handle decimal amounts correctly.
+* Handle missing shipping costs clearly.
+* Distinguish estimated values from actual values.
+
+Use proper database transactions where necessary.
+
+⸻
+
+24. Export and backup
+
+Add:
+
+Export CSV
+
+for:
+
+* Inventory
+* Sales
+* Expenses
+* Profit reports
+
+Also add a backup/export option if practical.
+
+The user should be able to download their business data.
+
+⸻
+
+25. Settings
+
+Create a Settings page with:
+
+* Business name
+* Currency
+* Default profit target
+* Inventory targets
+* Alert preferences
+* Dark/light mode
+* Data export
+* Backup
+* Reset demo data
+
+Do not put dangerous actions like “Delete all data” where they can be accidentally pressed.
+
+Require confirmation.
+
+⸻
+
+26. Demo data
+
+Initially include optional demo data so the interface can be tested.
+
+Use this example:
+
+2 × iPhone X
+
+Expected selling price: K2,700 each
+
+3 × iPhone 11
+
+Expected selling price: K4,000 each
+
+Purchase cost total: K9,212
+
+Estimated shipping: K1,000
+
+Estimated total landed cost: K10,212
+
+Expected revenue: K17,400
+
+Expected gross profit: K7,188
+
+Clearly label this as demo/example data, not real business data.
+
+Provide a button to remove demo data.
+
+⸻
+
+27. Important business logic
+
+Do not oversimplify the accounting.
+
+There are three different concepts:
+
+Inventory cost
+
+What I have invested into phones that I still own.
+
+Revenue
+
+Money received from selling phones.
+
+Profit
+
+Revenue minus the cost of the phones sold and relevant expenses.
+
+Do not calculate profit simply as:
+
+“Current cash − original investment.”
+
+Use proper transaction-based calculations.
+
+⸻
+
+28. User experience
+
+The most common action should be extremely fast:
+
+Add Phone
+
+and:
+
+Sell Phone
+
+I should be able to record a sale in a few taps.
+
+The app should never make me fill in unnecessary fields every time.
+
+Use sensible defaults.
+
+For example:
+
+* Date = today
+* Currency = ZMW
+* Status = In Stock
+* Payment method = Cash
+
+⸻
+
+29. Mobile experience
+
+This app will primarily be used on an iPhone.
+
+Make sure:
+
+* Buttons are large enough to tap.
+* Forms work well on mobile.
+* Tables become cards on small screens.
+* Numbers are easy to read.
+* Bottom navigation works properly.
+* No horizontal scrolling where possible.
+* Keyboard input for numbers works correctly.
+* The app loads quickly.
+
+⸻
+
+30. Technical requirements
+
+Choose a reliable modern full-stack architecture appropriate for Replit.
+
+Use:
+
+* A proper frontend framework.
+* A backend/API where necessary.
+* A persistent relational database.
+* Secure environment variables.
+* Proper validation.
+* Responsive CSS.
+* Clean reusable components.
+
+Keep the code modular and maintainable.
+
+Do not put everything into one giant file.
+
+Create separate components/pages/services for:
+
+* Dashboard
+* Inventory
+* Phone details
+* Add phone
+* Batches
+* Sales
+* Expenses
+* Money
+* Growth
+* Analytics
+* Settings
+
+⸻
+
+31. Authentication
+
+Initially make the app usable by a single business owner.
+
+If authentication is implemented, use secure authentication and make sure business data is private to the authenticated account.
+
+Do not expose database credentials or secrets in frontend code.
+
+⸻
+
+32. Final quality requirements
+
+Before considering the app finished:
+
+1. Test adding a phone.
+2. Test adding a batch.
+3. Test shipping allocation.
+4. Test calculating landed cost.
+5. Test calculating expected profit.
+6. Test selling a phone.
+7. Test actual profit calculation.
+8. Test expenses.
+9. Test personal withdrawals.
+10. Test dashboard updates.
+11. Test growth tracker.
+12. Test exporting data.
+13. Test refreshing/reopening the app.
+14. Test mobile layout.
+15. Test invalid inputs.
+16. Test that a sold phone cannot be sold again.
+17. Test that deleting/editing records does not corrupt financial calculations.
+
+Fix all errors before presenting the final app.
+
+⸻
+
+33. Build order
+
+Build the application in this order:
+
+Phase 1
+
+Database + core data models.
+
+Phase 2
+
+Add phone + inventory.
+
+Phase 3
+
+Batches + shipping allocation.
+
+Phase 4
+
+Sales + profit calculations.
+
+Phase 5
+
+Expenses + money management.
+
+Phase 6
+
+Dashboard.
+
+Phase 7
+
+Growth tracker.
+
+Phase 8
+
+Analytics.
+
+Phase 9
+
+Export/backup.
+
+Phase 10
+
+Polish the mobile UI and test everything.
+
+Do not skip the underlying data model just to make the UI look finished.
+
+⸻
+
+34. Important instruction to the AI builder
+
+Do not merely give me code snippets or explain how I could build this.
+
+Actually build the working application.
+
+Create all necessary files, database schema, pages, components, calculations, APIs, and styling.
+
+If you need to make a reasonable technical decision that I did not specify, choose the simplest reliable implementation and continue building rather than stopping to ask unnecessary questions.
+
+After building, explain:
+
+1. How to run the application.
+2. What database is being used.
+3. Where the main files are.
+4. How the financial calculations work.
+5. How to add my first real batch of phones.
+6. Any environment variables or setup steps required.
+
+The final result should be a working Phone Business Manager, not a prototype/mockup.
