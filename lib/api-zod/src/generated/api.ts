@@ -739,6 +739,85 @@ export const GetTopProductsResponse = zod.array(GetTopProductsResponseItem)
 
 
 /**
+ * @summary Get business capital and cash flow summary
+ */
+export const GetMoneySummaryResponse = zod.object({
+  "businessCapital": zod.number(),
+  "requiredReplacementCapital": zod.number(),
+  "stockCost": zod.number(),
+  "stockValue": zod.number(),
+  "potentialProfit": zod.number(),
+  "cashAvailable": zod.number(),
+  "totalRevenue": zod.number(),
+  "totalCogs": zod.number(),
+  "realizedGrossProfit": zod.number(),
+  "operatingExpenses": zod.number(),
+  "personalWithdrawals": zod.number(),
+  "phonesInStock": zod.number(),
+  "phonesSold": zod.number()
+})
+
+
+/**
+ * @summary List personal withdrawals
+ */
+export const ListWithdrawalsResponseItem = zod.object({
+  "id": zod.number(),
+  "amount": zod.number(),
+  "date": zod.coerce.date(),
+  "reason": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "category": zod.string()
+})
+export const ListWithdrawalsResponse = zod.array(ListWithdrawalsResponseItem)
+
+
+/**
+ * @summary Record a personal withdrawal
+ */
+export const createWithdrawalBodyAmountExclusiveMin = 0;
+
+
+export const createWithdrawalBodyCategoryDefault = `personal`;
+export const createWithdrawalBodyConfirmDefault = false;
+
+export const CreateWithdrawalBody = zod.object({
+  "amount": zod.number().gt(createWithdrawalBodyAmountExclusiveMin),
+  "date": zod.coerce.date(),
+  "reason": zod.string().min(1),
+  "category": zod.enum(['new_phone_stock', 'shipping', 'repairs', 'accessories', 'advertising', 'transport', 'business_equipment', 'personal', 'other']).default(createWithdrawalBodyCategoryDefault),
+  "confirm": zod.boolean().default(createWithdrawalBodyConfirmDefault)
+})
+
+export const CreateWithdrawalResponse = zod.object({
+  "withdrawal": zod.object({
+  "id": zod.number(),
+  "amount": zod.number(),
+  "date": zod.coerce.date(),
+  "reason": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "category": zod.string()
+}),
+  "warning": zod.boolean(),
+  "cashAvailableAfter": zod.number(),
+  "requiredReplacementCapital": zod.number()
+})
+
+
+/**
+ * @summary Delete a personal withdrawal
+ */
+export const DeleteWithdrawalParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteWithdrawalResponse = zod.object({
+  "success": zod.boolean(),
+  "id": zod.number()
+})
+
+
+/**
  * @summary List all conversations
  */
 export const ListAnthropicConversationsResponseItem = zod.object({

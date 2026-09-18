@@ -268,6 +268,63 @@ export interface TopProduct {
   profit: number;
 }
 
+export interface MoneySummary {
+  businessCapital: number;
+  requiredReplacementCapital: number;
+  stockCost: number;
+  stockValue: number;
+  potentialProfit: number;
+  cashAvailable: number;
+  totalRevenue: number;
+  totalCogs: number;
+  realizedGrossProfit: number;
+  operatingExpenses: number;
+  personalWithdrawals: number;
+  phonesInStock: number;
+  phonesSold: number;
+}
+
+export interface Withdrawal {
+  id: number;
+  amount: number;
+  date: string;
+  reason: string;
+  createdAt: string;
+  category: string;
+}
+
+export type WithdrawalInputCategory = typeof WithdrawalInputCategory[keyof typeof WithdrawalInputCategory];
+
+
+export const WithdrawalInputCategory = {
+  new_phone_stock: 'new_phone_stock',
+  shipping: 'shipping',
+  repairs: 'repairs',
+  accessories: 'accessories',
+  advertising: 'advertising',
+  transport: 'transport',
+  business_equipment: 'business_equipment',
+  personal: 'personal',
+  other: 'other',
+} as const;
+
+export interface WithdrawalInput {
+  /** @exclusiveMinimum 0 */
+  amount: number;
+  date: string;
+  /** @minLength 1 */
+  reason: string;
+  category?: WithdrawalInputCategory;
+  confirm?: boolean;
+}
+
+export interface WithdrawalCreated {
+  withdrawal: Withdrawal;
+  warning: boolean;
+  cashAvailableAfter: number;
+  requiredReplacementCapital: number;
+}
+
 export interface AnthropicConversation {
   id: number;
   title: string;

@@ -10,6 +10,9 @@ import {
   BarChart3,
   Settings,
   BrainCircuit,
+  Wallet,
+  Target,
+  MoreHorizontal,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useGetLowStockProducts } from "@workspace/api-client-react";
@@ -26,8 +29,19 @@ const navItems = [
   { href: "/expenses", label: "Expenses", icon: Receipt },
   { href: "/suppliers", label: "Suppliers", icon: Truck },
   { href: "/reports", label: "Reports", icon: BarChart3 },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/growth", label: "Growth", icon: Target },
+  { href: "/money", label: "Money", icon: Wallet },
   { href: "/ai-advisor", label: "AI Advisor", icon: BrainCircuit },
   { href: "/settings", label: "Settings", icon: Settings },
+];
+
+const mobileNavItems = [
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/inventory", label: "Inventory", icon: Package },
+  { href: "/sales", label: "Sales", icon: ShoppingCart },
+  { href: "/money", label: "Money", icon: Wallet },
+  { href: "/reports", label: "More", icon: MoreHorizontal },
 ];
 
 export function Layout({ children }: LayoutProps) {
@@ -45,7 +59,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-background text-foreground flex overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-[240px] border-r border-border flex flex-col shrink-0 relative overflow-hidden" 
+      <aside className="hidden md:flex w-[240px] border-r border-border flex-col shrink-0 relative overflow-hidden" 
              style={{ background: 'linear-gradient(180deg, hsl(222 50% 4%) 0%, hsl(220 45% 6%) 100%)' }}>
         
         {/* Noise overlay */}
@@ -121,7 +135,7 @@ export function Layout({ children }: LayoutProps) {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <header className="h-[60px] flex items-center justify-between px-8 bg-background/80 backdrop-blur-xl shrink-0 z-20 relative border-b border-border">
+        <header className="h-[60px] flex items-center justify-between px-4 md:px-8 bg-background/80 backdrop-blur-xl shrink-0 z-20 relative border-b border-border">
           <div className="flex items-center gap-4">
             <div className="flex flex-col">
               <h1 className="text-lg font-bold capitalize text-white tracking-tight">
@@ -141,7 +155,7 @@ export function Layout({ children }: LayoutProps) {
                 {lowStockCount} Low Stock
               </Link>
             )}
-            <div className="text-right flex flex-col items-end">
+            <div className="hidden sm:flex text-right flex-col items-end">
               <span className="text-sm font-medium text-white font-mono">
                 {currentTime.toLocaleTimeString('en-ZM', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
@@ -158,9 +172,28 @@ export function Layout({ children }: LayoutProps) {
           
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
         </header>
-        <div className="flex-1 overflow-auto p-8 relative z-10 pb-20">
+        <div className="flex-1 overflow-auto p-4 md:p-8 relative z-10 pb-24 md:pb-20">
           {children}
         </div>
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-[70px] border-t border-white/[0.08] bg-[#070b14]/95 backdrop-blur-xl grid grid-cols-5 px-2 pb-[env(safe-area-inset-bottom)]">
+          {mobileNavItems.map((item) => {
+            const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 text-[10px] font-bold transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                <Icon className={cn("w-5 h-5", isActive && "drop-shadow-[0_0_10px_hsl(var(--primary))]")} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </main>
     </div>
   );

@@ -5,6 +5,7 @@ import {
   useGetSalesByCategory, 
   useGetLowStockProducts,
   useGetTopProducts,
+  useGetMoneySummary,
   GetDashboardSummaryPeriod
 } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,6 +55,7 @@ export default function Dashboard() {
   const { data: salesByCategory, isLoading: isLoadingCategory } = useGetSalesByCategory({ period: period === 'today' ? 'week' : period }, { query: { queryKey: ['sales-category', period] } });
   const { data: lowStock, isLoading: isLoadingStock } = useGetLowStockProducts();
   const { data: topProducts, isLoading: isLoadingTop } = useGetTopProducts({ limit: 5, period: period === 'today' ? 'week' : period }, { query: { queryKey: ['top-products', period] } });
+  const { data: moneySummary, isLoading: isLoadingMoney } = useGetMoneySummary();
 
   const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -162,6 +164,37 @@ export default function Dashboard() {
               <Badge variant="outline" className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 font-mono text-[10px]">
                 Active this period
               </Badge>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Capital-aware business position */}
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          <Card className="glass-panel border-0">
+            <CardContent className="p-5">
+              <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Stock Cost</h3>
+              <div className="text-2xl font-black font-mono text-white">
+                {isLoadingMoney ? <Skeleton className="h-7 w-28" /> : formatZMW(moneySummary?.stockCost || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Capital invested in phones still in stock</p>
+            </CardContent>
+          </Card>
+          <Card className="glass-panel border-0">
+            <CardContent className="p-5">
+              <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Stock Value</h3>
+              <div className="text-2xl font-black font-mono text-primary">
+                {isLoadingMoney ? <Skeleton className="h-7 w-28" /> : formatZMW(moneySummary?.stockValue || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Expected selling value of current inventory</p>
+            </CardContent>
+          </Card>
+          <Card className="glass-panel border-0">
+            <CardContent className="p-5">
+              <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Potential Profit</h3>
+              <div className={`text-2xl font-black font-mono ${(moneySummary?.potentialProfit || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                {isLoadingMoney ? <Skeleton className="h-7 w-28" /> : formatZMW(moneySummary?.potentialProfit || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Expected value less current stock cost</p>
             </CardContent>
           </Card>
         </div>

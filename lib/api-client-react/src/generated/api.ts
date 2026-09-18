@@ -46,6 +46,7 @@ import type {
   ListExpensesParams,
   ListProductsParams,
   ListSalesParams,
+  MoneySummary,
   Product,
   ProductInput,
   ProductUpdate,
@@ -56,7 +57,10 @@ import type {
   Supplier,
   SupplierInput,
   SupplierUpdate,
-  TopProduct
+  TopProduct,
+  Withdrawal,
+  WithdrawalCreated,
+  WithdrawalInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -2287,6 +2291,300 @@ export function useGetTopProducts<TData = Awaited<ReturnType<typeof getTopProduc
 
 
 
+
+export const getGetMoneySummaryUrl = () => {
+
+
+
+
+  return `/api/money/summary`
+}
+
+/**
+ * @summary Get business capital and cash flow summary
+ */
+export const getMoneySummary = async ( options?: RequestInit): Promise<MoneySummary> => {
+
+  return customFetch<MoneySummary>(getGetMoneySummaryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMoneySummaryQueryKey = () => {
+    return [
+    `/api/money/summary`
+    ] as const;
+    }
+
+
+export const getGetMoneySummaryQueryOptions = <TData = Awaited<ReturnType<typeof getMoneySummary>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMoneySummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMoneySummaryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMoneySummary>>> = ({ signal }) => getMoneySummary({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMoneySummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMoneySummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getMoneySummary>>>
+export type GetMoneySummaryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get business capital and cash flow summary
+ */
+
+export function useGetMoneySummary<TData = Awaited<ReturnType<typeof getMoneySummary>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMoneySummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMoneySummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListWithdrawalsUrl = () => {
+
+
+
+
+  return `/api/money/withdrawals`
+}
+
+/**
+ * @summary List personal withdrawals
+ */
+export const listWithdrawals = async ( options?: RequestInit): Promise<Withdrawal[]> => {
+
+  return customFetch<Withdrawal[]>(getListWithdrawalsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListWithdrawalsQueryKey = () => {
+    return [
+    `/api/money/withdrawals`
+    ] as const;
+    }
+
+
+export const getListWithdrawalsQueryOptions = <TData = Awaited<ReturnType<typeof listWithdrawals>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWithdrawals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListWithdrawalsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWithdrawals>>> = ({ signal }) => listWithdrawals({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listWithdrawals>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListWithdrawalsQueryResult = NonNullable<Awaited<ReturnType<typeof listWithdrawals>>>
+export type ListWithdrawalsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List personal withdrawals
+ */
+
+export function useListWithdrawals<TData = Awaited<ReturnType<typeof listWithdrawals>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWithdrawals>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListWithdrawalsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateWithdrawalUrl = () => {
+
+
+
+
+  return `/api/money/withdrawals`
+}
+
+/**
+ * @summary Record a personal withdrawal
+ */
+export const createWithdrawal = async (withdrawalInput: WithdrawalInput, options?: RequestInit): Promise<WithdrawalCreated> => {
+
+  return customFetch<WithdrawalCreated>(getCreateWithdrawalUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(withdrawalInput)
+  }
+);}
+
+
+
+
+export const getCreateWithdrawalMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWithdrawal>>, TError,{data: BodyType<WithdrawalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createWithdrawal>>, TError,{data: BodyType<WithdrawalInput>}, TContext> => {
+
+const mutationKey = ['createWithdrawal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createWithdrawal>>, {data: BodyType<WithdrawalInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createWithdrawal(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateWithdrawalMutationResult = NonNullable<Awaited<ReturnType<typeof createWithdrawal>>>
+    export type CreateWithdrawalMutationBody = BodyType<WithdrawalInput>
+    export type CreateWithdrawalMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Record a personal withdrawal
+ */
+export const useCreateWithdrawal = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWithdrawal>>, TError,{data: BodyType<WithdrawalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createWithdrawal>>,
+        TError,
+        {data: BodyType<WithdrawalInput>},
+        TContext
+      > => {
+      return useMutation(getCreateWithdrawalMutationOptions(options));
+    }
+
+export const getDeleteWithdrawalUrl = (id: number,) => {
+
+
+
+
+  return `/api/money/withdrawals/${id}`
+}
+
+/**
+ * @summary Delete a personal withdrawal
+ */
+export const deleteWithdrawal = async (id: number, options?: RequestInit): Promise<DeleteResult> => {
+
+  return customFetch<DeleteResult>(getDeleteWithdrawalUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteWithdrawalMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWithdrawal>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteWithdrawal>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteWithdrawal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWithdrawal>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteWithdrawal(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteWithdrawalMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWithdrawal>>>
+
+    export type DeleteWithdrawalMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Delete a personal withdrawal
+ */
+export const useDeleteWithdrawal = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWithdrawal>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteWithdrawal>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteWithdrawalMutationOptions(options));
+    }
 
 export const getListAnthropicConversationsUrl = () => {
 

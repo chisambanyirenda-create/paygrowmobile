@@ -1,0 +1,324 @@
+STRICT BUSINESS MONEY GUARD
+
+Build a strict financial discipline system called Business Money Guard.
+
+Its purpose is to prevent me from accidentally spending money that should remain in the phone business.
+
+This feature should be visible on the Dashboard and have its own dedicated page.
+
+1. The three-money system
+
+The app must separate my money into:
+
+PROTECTED STOCK CAPITAL
+Money required to maintain/replenish my phone inventory.
+
+SAFE-TO-SPEND PROFIT
+Money that the business has genuinely earned and that I can potentially withdraw or spend.
+
+EMERGENCY BUSINESS RESERVE
+A configurable amount that I want to keep available for unexpected costs such as repairs, shipping increases, returns, or other business problems.
+
+Never combine these three numbers.
+
+⸻
+
+2. Strict spending calculator
+
+Create a calculator where I enter:
+
+* Current business cash
+* Current inventory cost
+* Number of phones in stock
+* Average landed cost per phone
+* Target number of phones
+* Emergency reserve
+* Amount I want to spend
+
+The app calculates:
+
+Protected Stock Capital
+
+= Target inventory requirement based on the configured target and/or the amount required to replace current stock.
+
+Safe-to-Spend Amount
+
+= Business cash − Protected Stock Capital − Emergency Reserve
+
+If the result is below zero:
+
+Safe-to-Spend Amount = K0
+
+Do not allow the app to display a negative amount as money I can spend.
+
+⸻
+
+3. Strict decision
+
+When I enter an amount I want to spend, give me a very clear result.
+
+If I can afford it:
+
+✅ SAFE TO SPEND
+
+Example:
+
+You can spend up to K2,500.
+
+Planned spending: K1,500
+
+Remaining safe-to-spend amount: K1,000
+
+If I cannot afford it:
+
+🛑 DO NOT SPEND
+
+Example:
+
+DO NOT SPEND K3,000
+
+Safe-to-spend amount: K1,200
+
+You would exceed your safe spending limit by K1,800.
+
+Your stock capital would be affected.
+
+The warning should be prominent and impossible to misunderstand.
+
+⸻
+
+4. Spending categories
+
+When recording spending, ask what the money is for:
+
+* New phone stock
+* Shipping
+* Repairs
+* Accessories
+* Advertising
+* Transport
+* Business equipment
+* Personal spending
+* Other
+
+Personal spending must never automatically reduce the protected stock capital calculation without showing the consequences.
+
+⸻
+
+5. “Can I afford this?” button
+
+Add a large button:
+
+CAN I AFFORD THIS?
+
+When pressed, show a simple calculator.
+
+Example:
+
+Business cash: K17,400
+
+Protected stock capital: K10,212
+
+Emergency reserve: K1,000
+
+Safe to spend: K6,188
+
+Then:
+
+I want to spend: K5,000
+
+Result:
+
+✅ YES — within your safe spending limit.
+
+Remaining safe-to-spend money: K1,188
+
+If I enter K8,000:
+
+🛑 NO — DO NOT SPEND.
+
+Safe-to-spend: K6,188
+
+Amount over limit: K1,812
+
+⸻
+
+6. Strict mode
+
+Add a setting called:
+
+STRICT MODE
+
+When enabled:
+
+* Always show the protected amount.
+* Always show the maximum safe spending amount.
+* Warn before personal withdrawals.
+* Warn before business purchases that could reduce stock capital.
+* Require confirmation for spending above the safe limit.
+* Never call protected stock capital “profit.”
+* Never count unsold inventory as cash.
+* Never count expected profit as spendable money.
+
+The app should use strong but professional language such as:
+
+“STOP — THIS MONEY IS PROTECTED FOR STOCK.”
+
+and:
+
+“You can spend K____ without reducing your protected business capital.”
+
+⸻
+
+7. Reinvestment recommendation
+
+Create a separate calculation:
+
+NEXT STOCK ORDER
+
+Show:
+
+* Current cash
+* Protected capital
+* Available profit
+* Average landed cost
+* Maximum phones affordable
+* Recommended amount to reinvest
+* Cash remaining after purchase
+
+Example:
+
+Current business cash: K17,400
+
+Protected capital: K10,212
+
+Safe-to-spend profit: K7,188
+
+Average landed cost: K2,042
+
+Maximum additional phones: 3
+
+Cost of 3 phones: approximately K6,126
+
+Remaining cash: approximately K11,274
+
+All figures must be calculated dynamically from actual database information.
+
+⸻
+
+8. Profit withdrawal calculator
+
+Create a button:
+
+HOW MUCH CAN I TAKE OUT?
+
+Calculate the maximum amount I can withdraw while maintaining:
+
+1. Required stock capital.
+2. Emergency reserve.
+3. Any outstanding business expenses.
+
+Show:
+
+Maximum safe withdrawal: K____
+
+Then show:
+
+If you withdraw K____, your business will have K____ remaining after protecting stock capital and your emergency reserve.
+
+⸻
+
+9. Business discipline score
+
+Do NOT create a fake financial “credit score.”
+
+Instead, show simple factual indicators:
+
+Stock Capital Protected: YES/NO
+
+Emergency Reserve Maintained: YES/NO
+
+Spending Within Limit: YES/NO
+
+Next Stock Target: K____
+
+Amount Needed: K____
+
+Do not use arbitrary scores such as “8/10 financial discipline.”
+
+⸻
+
+10. Important calculation rules
+
+The calculator must distinguish between:
+
+Cash = money actually available.
+
+Inventory = phones currently owned.
+
+Revenue = money received from sales.
+
+Gross Profit = revenue minus the landed cost of phones sold.
+
+Protected Capital = money reserved to keep the business operating and replace inventory.
+
+Safe-to-Spend = cash remaining after protected capital and emergency reserve.
+
+Expected Profit from unsold phones is NOT spendable cash.
+
+Never tell me I can spend money simply because my inventory has a high potential selling value.
+
+⸻
+
+11. Example using my current business
+
+Use this only as an example, not hard-coded data:
+
+I purchased:
+
+* 2 iPhone X
+* 3 iPhone 11
+
+Purchase cost:
+
+K9,212
+
+Estimated shipping:
+
+K1,000
+
+Estimated landed cost:
+
+K10,212
+
+Expected sales:
+
+K17,400
+
+Expected gross profit:
+
+K7,188
+
+If all phones are still unsold, the app must NOT tell me that K7,188 is currently spendable profit.
+
+It should recognize that the K10,212 is tied up in inventory.
+
+After phones are actually sold, the app should update the real cash and realized profit automatically.
+
+⸻
+
+12. Goal
+
+The purpose of this system is simple:
+
+Make it difficult for me to accidentally eat into my business capital.
+
+Every time I consider spending money, the app should answer:
+
+“How much can I safely spend?”
+
+and:
+
+“How much must remain protected for the business?”
+
+The calculations must be transparent so I can see exactly how the app arrived at the number.

@@ -5,3 +5,4 @@ export * from "./expenses";
 export * from "./sales";
 export * from "./conversations";
 export * from "./messages";
+export * from "./withdrawals";

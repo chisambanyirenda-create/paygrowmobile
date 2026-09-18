@@ -11,6 +11,9 @@ import Suppliers from '@/pages/suppliers';
 import Reports from '@/pages/reports';
 import Settings from '@/pages/settings';
 import AIAdvisor from '@/pages/ai-advisor';
+import Money from '@/pages/money';
+import Growth from '@/pages/growth';
+import Analytics from '@/pages/analytics';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 
 const queryClient = new QueryClient({
@@ -33,6 +36,9 @@ function Router() {
       <Route path="/suppliers" component={Suppliers} />
       <Route path="/reports" component={Reports} />
       <Route path="/ai-advisor" component={AIAdvisor} />
+      <Route path="/money" component={Money} />
+      <Route path="/growth" component={Growth} />
+      <Route path="/analytics" component={Analytics} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>

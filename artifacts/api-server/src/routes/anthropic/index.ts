@@ -143,10 +143,10 @@ ${topProducts.map((p, i) => `${i + 1}. ${p.name} (${p.brand}) — ${p.unitsSold}
 ${expensesByCategory.map(e => `• ${e.category}: ${K(e.total)}`).join("\n") || "No expenses recorded this month."}
 
 --- LOW STOCK ALERTS ---
-${lowStockItems.map(p => `⚠ ${p.name} — ${p.stock} left (threshold: ${p.threshold}), selling at ${K(p.sellingPrice)}`).join("\n") || "All stock levels are healthy."}
+  ${lowStockItems.map(p => `⚠ ${p.name} — ${p.stock} left (threshold: ${p.threshold}), selling at ${K(Number(p.sellingPrice))}`).join("\n") || "All stock levels are healthy."}
 
 --- RECENT TRANSACTIONS ---
-${recentSales.map(s => `• ${new Date(s.createdAt).toLocaleDateString()} — ${K(s.totalAmount)} (profit: ${K(s.profit)}, via ${s.paymentMethod})`).join("\n") || "No recent sales."}
+  ${recentSales.map(s => `• ${new Date(s.createdAt).toLocaleDateString()} — ${K(Number(s.totalAmount))} (profit: ${K(Number(s.profit))}, via ${s.paymentMethod})`).join("\n") || "No recent sales."}
 `.trim();
 }
 
@@ -176,7 +176,10 @@ router.get("/conversations/:id", async (req, res) => {
     .select()
     .from(conversationsTable)
     .where(eq(conversationsTable.id, id));
-  if (!conv) return res.status(404).json({ error: "Not found" });
+  if (!conv) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
 
   const messages = await db
     .select()
@@ -195,7 +198,10 @@ router.delete("/conversations/:id", async (req, res) => {
     .delete(conversationsTable)
     .where(eq(conversationsTable.id, id))
     .returning();
-  if (!deleted.length) return res.status(404).json({ error: "Not found" });
+  if (!deleted.length) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.status(204).end();
 });
 
@@ -216,7 +222,8 @@ router.post("/conversations/:id/messages", async (req, res) => {
   const { content } = req.body as { content: string };
 
   if (!content?.trim()) {
-    return res.status(400).json({ error: "content is required" });
+    res.status(400).json({ error: "content is required" });
+    return;
   }
 
   // Save user message

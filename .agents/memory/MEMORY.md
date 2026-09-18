@@ -2,3 +2,4 @@
 - [Progress component indicatorColor](progress-indicatorcolor.md) — radix Progress needs custom prop extension; the base component ignores unknown props
 - [MobiTrack DB column names](mobitrack-db-columns.md) — actual column names for products/sales schema (stockQuantity not stock, lineTotal not revenue)
 - [MobiTrack Anthropic AI route](mobitrack-ai-route.md) — SSE streaming, direct ANTHROPIC_API_KEY, Orval queryKey typing quirk
+- [Business Money Guard](business-money-guard.md) — spendable cash must be floored at zero after protecting stock capital and emergency reserve

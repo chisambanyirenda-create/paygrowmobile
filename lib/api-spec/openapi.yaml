@@ -24,6 +24,8 @@ tags:
     description: Product suppliers
   - name: dashboard
     description: Dashboard analytics and summaries
+  - name: money
+    description: Business capital, cash flow, and withdrawals
 
 paths:
   /healthz:
@@ -627,6 +629,83 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TopProduct"
+
+  # ── Money ──────────────────────────────────────────────────
+  /money/summary:
+    get:
+      operationId: getMoneySummary
+      tags: [money]
+      summary: Get business capital and cash flow summary
+      responses:
+        "200":
+          description: Money summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MoneySummary"
+
+  /money/withdrawals:
+    get:
+      operationId: listWithdrawals
+      tags: [money]
+      summary: List personal withdrawals
+      responses:
+        "200":
+          description: Withdrawals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Withdrawal"
+    post:
+      operationId: createWithdrawal
+      tags: [money]
+      summary: Record a personal withdrawal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalInput"
+      responses:
+        "201":
+          description: Withdrawal recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawalCreated"
+        "400":
+          description: Invalid withdrawal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /money/withdrawals/{id}:
+    delete:
+      operationId: deleteWithdrawal
+      tags: [money]
+      summary: Delete a personal withdrawal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   # ── Anthropic AI ──────────────────────────────────────────
   /anthropic/conversations:
@@ -1296,6 +1375,117 @@ components:
         - unitsSold
         - revenue
         - profit
+
+    # ── Money ───────────────────────────────────────────────
+    MoneySummary:
+      type: object
+      properties:
+        businessCapital:
+          type: number
+        requiredReplacementCapital:
+          type: number
+        stockCost:
+          type: number
+        stockValue:
+          type: number
+        potentialProfit:
+          type: number
+        cashAvailable:
+          type: number
+        totalRevenue:
+          type: number
+        totalCogs:
+          type: number
+        realizedGrossProfit:
+          type: number
+        operatingExpenses:
+          type: number
+        personalWithdrawals:
+          type: number
+        phonesInStock:
+          type: integer
+        phonesSold:
+          type: integer
+      required:
+        - businessCapital
+        - requiredReplacementCapital
+        - stockCost
+        - stockValue
+        - potentialProfit
+        - cashAvailable
+        - totalRevenue
+        - totalCogs
+        - realizedGrossProfit
+        - operatingExpenses
+        - personalWithdrawals
+        - phonesInStock
+        - phonesSold
+
+    Withdrawal:
+      type: object
+      properties:
+        id:
+          type: integer
+        amount:
+          type: number
+        date:
+          type: string
+          format: date
+        reason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        category:
+          type: string
+      required:
+        - id
+        - amount
+        - date
+        - reason
+        - category
+        - createdAt
+
+    WithdrawalInput:
+      type: object
+      properties:
+        amount:
+          type: number
+          exclusiveMinimum: 0
+        date:
+          type: string
+          format: date
+        reason:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          enum: [new_phone_stock, shipping, repairs, accessories, advertising, transport, business_equipment, personal, other]
+          default: personal
+        confirm:
+          type: boolean
+          default: false
+      required:
+        - amount
+        - date
+        - reason
+
+    WithdrawalCreated:
+      type: object
+      properties:
+        withdrawal:
+          $ref: "#/components/schemas/Withdrawal"
+        warning:
+          type: boolean
+        cashAvailableAfter:
+          type: number
+        requiredReplacementCapital:
+          type: number
+      required:
+        - withdrawal
+        - warning
+        - cashAvailableAfter
+        - requiredReplacementCapital
 
     # ── Anthropic ─────────────────────────────────────────
     AnthropicConversation:
