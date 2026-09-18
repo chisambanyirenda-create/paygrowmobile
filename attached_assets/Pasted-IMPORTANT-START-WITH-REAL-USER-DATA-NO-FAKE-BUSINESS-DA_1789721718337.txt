@@ -1,0 +1,404 @@
+IMPORTANT: START WITH REAL USER DATA — NO FAKE BUSINESS DATA
+
+Do NOT populate the production app with fake phones, fake sales, fake profit, or demo financial figures.
+
+When I first open the application, my inventory should be empty unless I have entered real information.
+
+The application should have a setup process where I can enter my REAL current business information.
+
+Do not assume that I own any particular number of phones.
+
+Do not assume my starting capital.
+
+Do not assume my purchase prices.
+
+Do not assume my selling prices.
+
+All business calculations must be based only on information I actually enter.
+
+⸻
+
+PHONE ACQUISITION SYSTEM
+
+A phone can enter my inventory in different ways.
+
+When I add a phone, first ask:
+
+How did you get this phone?
+
+Options:
+
+1. Purchased
+2. Free / Gift
+3. Trade-in
+4. Other
+
+⸻
+
+1. PURCHASED PHONE
+
+If I select Purchased, show:
+
+* Purchase price
+* Shipping
+* Customs/import costs
+* Repairs
+* Accessories
+* Other costs
+
+Calculate:
+
+Total Cost = Purchase Price + Shipping + Customs + Repairs + Accessories + Other Costs
+
+Then allow me to enter:
+
+Expected Selling Price
+
+Calculate:
+
+Expected Profit = Expected Selling Price − Total Cost
+
+⸻
+
+2. FREE / GIFT PHONE
+
+This is very important.
+
+Sometimes I may receive a phone for free.
+
+For example:
+
+iPhone X
+
+Acquisition type:
+
+Free / Gift
+
+Purchase price:
+
+K0
+
+Shipping:
+
+K0
+
+Repairs:
+
+K0
+
+Expected selling price:
+
+K2,700
+
+The system should calculate:
+
+Actual Cash Cost = K0
+
+Expected Sale = K2,700
+
+Expected Gross Profit = K2,700
+
+However, the app must clearly distinguish between:
+
+Cash invested: K0
+
+and
+
+Potential value/profit: K2,700
+
+Do not pretend that a free phone cost me money.
+
+If I later spend K300 repairing the phone, then:
+
+Actual Cost = K300
+
+and if I sell it for K2,700:
+
+Gross Profit = K2,400
+
+All calculations must update automatically.
+
+⸻
+
+3. TRADE-IN
+
+Allow a phone to be acquired through a trade.
+
+For example:
+
+I give someone:
+
+Old phone valued at K1,500
+
+and receive:
+
+iPhone 11
+
+The app should allow me to record the value assigned to what I gave up.
+
+Then calculate the phone’s acquisition cost based on the trade value plus any additional costs.
+
+Do not treat this as a normal cash purchase.
+
+Clearly label:
+
+Acquisition method: Trade-in
+
+⸻
+
+4. OTHER
+
+Allow custom acquisition methods.
+
+For example:
+
+* Business transfer
+* Prize
+* Family transfer
+* Other
+
+Allow the user to enter the appropriate cost/value manually.
+
+⸻
+
+EXPECTED SELLING PRICE VS ACTUAL SELLING PRICE
+
+Every phone should have two separate fields:
+
+Expected Selling Price
+
+What I currently think I can sell the phone for.
+
+Actual Selling Price
+
+The amount I actually sold it for.
+
+Do NOT replace the expected selling price with the actual selling price automatically.
+
+Keep both values in the database.
+
+Before sale:
+
+Show:
+
+Expected Sale: K4,000
+
+Expected Profit: K1,958
+
+After sale:
+
+Show:
+
+Actual Sale: K3,800
+
+Actual Profit: K1,758
+
+The actual sale should be used for realized revenue and realized profit.
+
+⸻
+
+PRICE UPDATE FEATURE
+
+I should be able to change the expected selling price at any time.
+
+Example:
+
+I originally enter:
+
+iPhone 11
+
+Expected selling price: K4,000
+
+Later I decide the market price is only K3,700.
+
+I should be able to edit:
+
+Expected Selling Price → K3,700
+
+The app immediately recalculates:
+
+Expected Profit
+
+and:
+
+Expected Profit Margin
+
+This should NOT change the original acquisition cost.
+
+⸻
+
+FREE PHONE EXAMPLE
+
+Allow this workflow:
+
+Add Phone
+
+Model:
+iPhone 11
+
+Acquisition:
+Free / Gift
+
+Purchase price:
+K0
+
+Shipping:
+K0
+
+Repairs:
+K0
+
+Accessories:
+K0
+
+Expected selling price:
+K4,000
+
+The app should show:
+
+Cash invested: K0
+
+Expected selling price: K4,000
+
+Expected profit: K4,000
+
+Status:
+
+In Stock
+
+If I later add K500 repair cost:
+
+Total actual cost: K500
+
+Expected profit: K3,500
+
+If I eventually sell for K3,800:
+
+Actual revenue: K3,800
+
+Actual profit: K3,300
+
+⸻
+
+INVENTORY VALUE
+
+Do not confuse inventory value with cash.
+
+For every phone, show:
+
+Acquisition Cost
+
+Expected Selling Price
+
+Expected Profit
+
+The dashboard can calculate:
+
+Potential Inventory Revenue
+
+but must NOT add that potential revenue to my actual business cash.
+
+For example:
+
+If I have a free iPhone worth K4,000:
+
+Inventory:
+
+1 phone
+
+Potential revenue:
+
+K4,000
+
+Actual cash:
+
+K0
+
+The app must not say I have K4,000 cash.
+
+⸻
+
+STARTUP / INITIAL SETUP
+
+When I first open the app, show:
+
+“Let’s set up your real business”
+
+Ask:
+
+How much business cash do you currently have?
+
+How many phones do you currently own?
+
+Then allow me to add each existing phone individually.
+
+For every existing phone I should be able to choose:
+
+* Purchased
+* Free/Gift
+* Trade-in
+* Other
+
+I should then enter its actual information.
+
+Do not create sample phones automatically.
+
+⸻
+
+RESET DEMO DATA
+
+Do not include fake demo data in the real business database.
+
+If you want to demonstrate the interface, create a completely separate:
+
+“Try Demo Mode”
+
+button.
+
+Demo Mode must use a separate temporary dataset and must never mix with my real business data.
+
+The real business mode must always start with my actual information.
+
+⸻
+
+STRICT MONEY CALCULATOR UPDATE
+
+The Business Money Guard must also understand free phones.
+
+A free phone with K0 acquisition cost should NOT cause the app to reserve money that was never spent.
+
+However, if I decide that I need K500 for repairs, the app should reserve/account for that K500.
+
+The calculator must always distinguish:
+
+Cash actually invested
+
+from:
+
+Potential selling value
+
+and:
+
+Expected profit.
+
+⸻
+
+IMPORTANT
+
+The app is a business accounting and inventory tool.
+
+Never invent financial information.
+
+Never assume a phone was purchased.
+
+Never assume a selling price.
+
+Never assume shipping.
+
+Never assume profit.
+
+Everything must come from the user’s actual entries.
+
+The user must be able to edit every important financial value.
+
+The app should show exactly how each calculation was produced so the business owner can trust the numbers.
