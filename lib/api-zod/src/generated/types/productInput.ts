@@ -14,6 +14,11 @@ export interface ProductInput {
   category: string;
   brand?: string;
   model?: string;
+  storage?: string;
+  color?: string;
+  condition?: string;
+  imei?: string;
+  batteryHealth?: string;
   /** @minimum 0 */
   costPrice: number;
   /** @minimum 0 */
@@ -34,6 +39,7 @@ export interface ProductInput {
   /** @minimum 0 */
   tradeValue?: number;
   acquisitionNote?: string;
+  acquisitionDate?: Date;
   /** @minimum 0 */
   stockQuantity: number;
   /** @minimum 0 */

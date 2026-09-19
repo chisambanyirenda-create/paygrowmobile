@@ -13,6 +13,11 @@ export interface ProductUpdate {
   category?: string;
   brand?: string;
   model?: string;
+  storage?: string;
+  color?: string;
+  condition?: string;
+  imei?: string;
+  batteryHealth?: string;
   /** @minimum 0 */
   costPrice?: number;
   /** @minimum 0 */
@@ -39,4 +44,5 @@ export interface ProductUpdate {
   /** @minimum 0 */
   tradeValue?: number;
   acquisitionNote?: string;
+  acquisitionDate?: Date;
 }

@@ -927,6 +927,16 @@ components:
           type: ["string", "null"]
         model:
           type: ["string", "null"]
+        storage:
+          type: ["string", "null"]
+        color:
+          type: ["string", "null"]
+        condition:
+          type: ["string", "null"]
+        imei:
+          type: ["string", "null"]
+        batteryHealth:
+          type: ["string", "null"]
         costPrice:
           type: number
           description: Purchase price in ZMW
@@ -952,6 +962,9 @@ components:
           type: number
         acquisitionNote:
           type: ["string", "null"]
+        acquisitionDate:
+          type: ["string", "null"]
+          format: date-time
         stockQuantity:
           type: integer
         lowStockThreshold:
@@ -993,6 +1006,16 @@ components:
           type: string
         model:
           type: string
+        storage:
+          type: string
+        color:
+          type: string
+        condition:
+          type: string
+        imei:
+          type: string
+        batteryHealth:
+          type: string
         costPrice:
           type: number
           minimum: 0
@@ -1025,6 +1048,9 @@ components:
           minimum: 0
         acquisitionNote:
           type: string
+        acquisitionDate:
+          type: string
+          format: date-time
         stockQuantity:
           type: integer
           minimum: 0
@@ -1056,6 +1082,16 @@ components:
           type: string
         model:
           type: string
+        storage:
+          type: string
+        color:
+          type: string
+        condition:
+          type: string
+        imei:
+          type: string
+        batteryHealth:
+          type: string
         costPrice:
           type: number
           minimum: 0
@@ -1098,6 +1134,9 @@ components:
           minimum: 0
         acquisitionNote:
           type: string
+        acquisitionDate:
+          type: string
+          format: date-time
 
     BusinessSettings:
       type: object

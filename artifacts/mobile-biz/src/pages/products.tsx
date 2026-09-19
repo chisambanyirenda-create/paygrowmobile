@@ -568,6 +568,11 @@ const productSchema = z.object({
   category: z.string().min(1),
   brand: z.string().optional(),
   model: z.string().optional(),
+  storage: z.string().optional(),
+  color: z.string().optional(),
+  condition: z.string().optional(),
+  imei: z.string().optional(),
+  batteryHealth: z.string().optional(),
   costPrice: z.coerce.number().min(0),
   sellingPrice: z.coerce.number().min(0),
   acquisitionType: z.enum(["purchased", "free_gift", "trade_in", "other"]),
@@ -579,11 +584,76 @@ const productSchema = z.object({
   otherCost: z.coerce.number().min(0),
   tradeValue: z.coerce.number().min(0),
   acquisitionNote: z.string().optional(),
+  acquisitionDate: z.string().optional(),
   stockQuantity: z.coerce.number().min(0),
   lowStockThreshold: z.coerce.number().min(0),
   supplierId: z.coerce.number().optional(),
 });
 type ProductFormValues = z.infer<typeof productSchema>;
+
+function BulkPhoneDialog({ onCreate }: { onCreate: (items: ProductFormValues[]) => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [values, setValues] = useState({
+    brand: "", model: "", storage: "", color: "", condition: "", quantity: "2",
+    purchaseTotal: "", shippingTotal: "", customsTotal: "0", repairTotal: "0",
+    accessoriesTotal: "0", otherTotal: "0", expectedSellingPrice: "",
+  });
+  const set = (key: keyof typeof values, value: string) => setValues((current) => ({ ...current, [key]: value }));
+  const submit = async () => {
+    const quantity = Number(values.quantity);
+    if (!Number.isInteger(quantity) || quantity < 1 || !values.model.trim()) return;
+    const perUnit = (key: keyof typeof values) => Number(values[key]) / quantity || 0;
+    const items: ProductFormValues[] = Array.from({ length: quantity }, (_, index) => {
+      const purchasePrice = perUnit("purchaseTotal");
+      const shippingCost = perUnit("shippingTotal");
+      const customsCost = perUnit("customsTotal");
+      const repairCost = perUnit("repairTotal");
+      const accessoriesCost = perUnit("accessoriesTotal");
+      const otherCost = perUnit("otherTotal");
+      return {
+        name: `${values.brand.trim()} ${values.model.trim()}${values.storage.trim() ? ` — ${values.storage.trim()}` : ""}`.trim(),
+        sku: "", category: "phones", brand: values.brand, model: values.model,
+        storage: values.storage, color: values.color, condition: values.condition, imei: "", batteryHealth: "",
+        acquisitionType: "purchased", purchasePrice, shippingCost, customsCost, repairCost, accessoriesCost, otherCost,
+        tradeValue: 0, acquisitionNote: `Batch entry ${index + 1} of ${quantity}`,
+        acquisitionDate: new Date().toISOString().slice(0, 10),
+        costPrice: purchasePrice + shippingCost + customsCost + repairCost + accessoriesCost + otherCost,
+        sellingPrice: Number(values.expectedSellingPrice) || 0, stockQuantity: 1, lowStockThreshold: 1,
+      };
+    });
+    await onCreate(items);
+    setOpen(false);
+  };
+  const fields: Array<[keyof typeof values, string]> = [
+    ["brand", "Brand"], ["model", "Model *"], ["storage", "Storage"], ["color", "Color"],
+    ["condition", "Condition"], ["quantity", "Quantity"], ["purchaseTotal", "Total purchase cost"],
+    ["shippingTotal", "Total shipping"], ["customsTotal", "Total customs/import"], ["repairTotal", "Total repairs"],
+    ["accessoriesTotal", "Total accessories"], ["otherTotal", "Total other costs"], ["expectedSellingPrice", "Expected selling price per phone"],
+  ];
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="border-primary/40 text-primary hover:bg-primary/10 font-bold"><Plus className="w-4 h-4 mr-2" /> Add Multiple</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto bg-card border-border/50">
+        <DialogHeader><DialogTitle className="text-xl text-white">Add multiple identical phones</DialogTitle></DialogHeader>
+        <p className="text-xs text-muted-foreground">Enter order totals. MobiTrack divides each cost across the quantity and creates one editable inventory record per phone.</p>
+        <div className="grid grid-cols-2 gap-4 mt-2">
+          {fields.map(([key, label]) => (
+            <div key={key} className={key === "model" || key === "expectedSellingPrice" ? "col-span-2" : ""}>
+              <label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</label>
+              <Input type={["quantity", "purchaseTotal", "shippingTotal", "customsTotal", "repairTotal", "accessoriesTotal", "otherTotal", "expectedSellingPrice"].includes(key) ? "number" : "text"} min="0" step="0.01" value={values[key]} onChange={(event) => set(key, event.target.value)} className="mt-1 bg-background" />
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={() => void submit()} className="font-bold">Create inventory units</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 // ─── Shared product form fields ───────────────────────────────────────────────
 function ProductFormFields({
@@ -679,6 +749,37 @@ function ProductFormFields({
           </FormItem>
         )} />
 
+        <FormField control={form.control} name="storage" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Storage</FormLabel>
+            <FormControl><Input {...field} placeholder="64GB, 128GB…" className="bg-background" /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="color" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Color</FormLabel>
+            <FormControl><Input {...field} placeholder="Black, Blue…" className="bg-background" /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="condition" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Condition</FormLabel>
+            <FormControl><Input {...field} placeholder="New, Used, Refurbished…" className="bg-background" /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="batteryHealth" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Battery health</FormLabel>
+            <FormControl><Input {...field} placeholder="e.g. 87%" className="bg-background" /></FormControl>
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="imei" render={({ field }) => (
+          <FormItem className="col-span-2">
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">IMEI / Serial</FormLabel>
+            <FormControl><Input {...field} placeholder="Optional" className="bg-background font-mono" /></FormControl>
+          </FormItem>
+        )} />
+
         <FormField control={form.control} name="acquisitionType" render={({ field }) => (
           <FormItem className="col-span-2">
             <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">How did you get this phone? *</FormLabel>
@@ -761,6 +862,12 @@ function ProductFormFields({
             <FormControl><Input {...field} placeholder="Gift source, trade details, or other context" className="bg-background" /></FormControl>
           </FormItem>
         )} />
+        <FormField control={form.control} name="acquisitionDate" render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Acquisition date</FormLabel>
+            <FormControl><Input type="date" {...field} className="bg-background" /></FormControl>
+          </FormItem>
+        )} />
       </div>
     </div>
   );
@@ -789,11 +896,11 @@ export default function Products() {
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, acquisitionType:"purchased", purchasePrice:0, shippingCost:0, customsCost:0, repairCost:0, accessoriesCost:0, otherCost:0, tradeValue:0, acquisitionNote:"", stockQuantity:0, lowStockThreshold:3 },
+    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", storage:"", color:"", condition:"", imei:"", batteryHealth:"", costPrice:0, sellingPrice:0, acquisitionType:"purchased", purchasePrice:0, shippingCost:0, customsCost:0, repairCost:0, accessoriesCost:0, otherCost:0, tradeValue:0, acquisitionNote:"", acquisitionDate:"", stockQuantity:0, lowStockThreshold:3 },
   });
   const editForm = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, acquisitionType:"purchased", purchasePrice:0, shippingCost:0, customsCost:0, repairCost:0, accessoriesCost:0, otherCost:0, tradeValue:0, acquisitionNote:"", stockQuantity:0, lowStockThreshold:3 },
+    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", storage:"", color:"", condition:"", imei:"", batteryHealth:"", costPrice:0, sellingPrice:0, acquisitionType:"purchased", purchasePrice:0, shippingCost:0, customsCost:0, repairCost:0, accessoriesCost:0, otherCost:0, tradeValue:0, acquisitionNote:"", acquisitionDate:"", stockQuantity:0, lowStockThreshold:3 },
   });
 
   // Accessories Catalog → pre-fill form + open dialog
@@ -803,11 +910,12 @@ export default function Products() {
       name: `${accessory.name}${variant.label !== "Standard" ? ` — ${variant.label}` : ""}`,
       brand: "",
       model: "",
+      storage: "", color: "", condition: "", imei: "", batteryHealth: "",
       category: "accessories",
       sku: "",
       costPrice: 0,
       sellingPrice: 0,
-      acquisitionType: "purchased", purchasePrice: 0, shippingCost: 0, customsCost: 0, repairCost: 0, accessoriesCost: 0, otherCost: 0, tradeValue: 0, acquisitionNote: "",
+      acquisitionType: "purchased", purchasePrice: 0, shippingCost: 0, customsCost: 0, repairCost: 0, accessoriesCost: 0, otherCost: 0, tradeValue: 0, acquisitionNote: "", acquisitionDate: "",
       stockQuantity: 0,
       lowStockThreshold: 5,
     });
@@ -823,11 +931,12 @@ export default function Products() {
       name: `${phone.name} — ${variant.storage}`,
       brand: phone.brand,
       model: phone.model,
+      storage: variant.storage, color: "", condition: "", imei: "", batteryHealth: "",
       category: "phones",
       sku: "",
       costPrice: 0,
       sellingPrice: 0,
-      acquisitionType: "purchased", purchasePrice: 0, shippingCost: 0, customsCost: 0, repairCost: 0, accessoriesCost: 0, otherCost: 0, tradeValue: 0, acquisitionNote: "",
+      acquisitionType: "purchased", purchasePrice: 0, shippingCost: 0, customsCost: 0, repairCost: 0, accessoriesCost: 0, otherCost: 0, tradeValue: 0, acquisitionNote: "", acquisitionDate: "",
       stockQuantity: 0,
       lowStockThreshold: 3,
     });
@@ -850,6 +959,12 @@ export default function Products() {
     });
   };
 
+  const onCreateBulk = async (items: ProductFormValues[]) => {
+    await Promise.all(items.map((data) => createProduct.mutateAsync({ data })));
+    await queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+    toast({ title: `${items.length} phone${items.length === 1 ? "" : "s"} added to inventory ✓` });
+  };
+
   const onEditSubmit = (data: ProductFormValues) => {
     if (!editingProduct) return;
     const cost = data.acquisitionType === "trade_in" ? data.tradeValue : data.purchasePrice;
@@ -867,11 +982,14 @@ export default function Products() {
     editForm.reset({
       name: product.name, sku: product.sku || "", category: product.category,
       brand: product.brand || "", model: product.model || "",
+      storage: product.storage || "", color: product.color || "", condition: product.condition || "",
+      imei: product.imei || "", batteryHealth: product.batteryHealth || "",
       costPrice: product.costPrice, sellingPrice: product.sellingPrice,
       acquisitionType: (product.acquisitionType as ProductFormValues["acquisitionType"]) || "purchased",
       purchasePrice: product.purchasePrice || 0, shippingCost: product.shippingCost || 0, customsCost: product.customsCost || 0,
       repairCost: product.repairCost || 0, accessoriesCost: product.accessoriesCost || 0, otherCost: product.otherCost || 0,
       tradeValue: product.tradeValue || 0, acquisitionNote: product.acquisitionNote || "",
+      acquisitionDate: product.acquisitionDate ? String(product.acquisitionDate).slice(0, 10) : "",
       stockQuantity: product.stockQuantity, lowStockThreshold: product.lowStockThreshold,
       supplierId: product.supplierId || undefined,
     });
@@ -905,6 +1023,7 @@ export default function Products() {
           <div className="flex gap-3 flex-wrap">
             <AccessoriesCatalogDialog onSelect={handleAccCatalogSelect} />
             <PhoneCatalogDialog onSelect={handleCatalogSelect} />
+            <BulkPhoneDialog onCreate={onCreateBulk} />
 
             <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if (!open) { setCatalogSel(null); setAccCatalogSel(null); form.reset(); } }}>
               <DialogTrigger asChild>

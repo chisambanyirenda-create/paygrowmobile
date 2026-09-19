@@ -1,0 +1,348 @@
+Update the existing phone-business app. Do NOT use fake/sample business data anymore.
+
+I want the app to start with my real business data only. I should be able to manually enter the phones I actually have, the price I paid, all additional costs, and my expected selling price. The system must then automatically read, calculate, and manage the business based on the data I enter.
+
+1. REMOVE ALL FAKE DATA
+
+Remove the existing fake/sample phones, fake sales, fake revenue, fake expenses, fake profits, and fake dashboard numbers.
+
+When I open the app, it should either:
+
+* show an empty business if I haven’t entered anything yet, OR
+* show only the real data that I have entered.
+
+Do not automatically create example phones or transactions.
+
+2. ADD MY CURRENT PHONES
+
+I want to add the phones I actually ordered.
+
+For my current stock, I want to be able to enter:
+
+iPhone 11
+
+* Model: iPhone 11
+* Quantity: 3
+* Purchase price: K4,500 total
+* Shipping: K1,000 total
+* Customs/import: K0 unless I enter an amount
+* Repairs: K0 unless I enter an amount
+* Accessories: K0 unless I enter an amount
+* Other costs: K0 unless I enter an amount
+* Expected selling price: K4,000 each
+
+iPhone X
+
+* Model: iPhone X
+* Quantity: 2
+* Purchase price: K4,712 total
+* Shipping: part of the K1,000 total shipping cost
+* Customs/import: K0 unless I enter an amount
+* Repairs: K0 unless I enter an amount
+* Accessories: K0 unless I enter an amount
+* Other costs: K0 unless I enter an amount
+* Expected selling price: K2,700 each
+
+IMPORTANT: These numbers are my actual starting business data. Do not create different numbers or replace them with sample data.
+
+3. SHIPPING ALLOCATION
+
+Because the K1,000 shipping cost applies to the whole order, the system should allow me to enter:
+
+Total shipping = K1,000
+Total phones = 5
+
+Then automatically calculate:
+
+K1,000 ÷ 5 = K200 shipping per phone.
+
+The system should add the allocated shipping to each phone’s actual landed cost.
+
+I should also be able to manually change the shipping allocation for an individual phone if necessary.
+
+4. CALCULATE EACH PHONE’S REAL COST
+
+For every phone:
+
+Total Cost =
+Purchase/Acquisition Cost
+
+* Shipping
+* Customs
+* Repairs
+* Accessories
+* Other Costs
+
+The app must automatically calculate this.
+
+Do not make me calculate it manually.
+
+5. EXPECTED SELLING PRICE
+
+Expected Selling Price must be separate from the purchase price.
+
+For example:
+
+iPhone 11:
+
+* Cost = automatically calculated
+* Expected selling price = K4,000
+* Expected profit = K4,000 − total cost
+
+iPhone X:
+
+* Cost = automatically calculated
+* Expected selling price = K2,700
+* Expected profit = K2,700 − total cost
+
+Also calculate expected profit margin automatically.
+
+6. IMPORTANT: I CONTROL THE DATA
+
+The system should never assume that my numbers are fixed.
+
+I must be able to:
+
+* Add a phone
+* Edit a phone
+* Change purchase price
+* Change shipping
+* Add repair costs later
+* Add customs later
+* Add accessories later
+* Change expected selling price
+* Change quantity
+* Delete a phone
+* Mark a phone as sold
+
+Whenever I change the data, the dashboard and calculations must update automatically.
+
+7. I WANT THE SYSTEM TO “READ” MY DATA
+
+The app should act like a business manager.
+
+When I enter my information, it should automatically understand:
+
+* How much money I invested
+* How much money is currently tied up in stock
+* How many phones I own
+* How much each phone actually costs me
+* Potential revenue
+* Potential profit
+* Realized revenue after sales
+* Realized profit after sales
+* Business expenses
+* Personal withdrawals
+* Cash available
+* Protected stock capital
+* Safe-to-spend money
+
+Do not use hard-coded numbers for these calculations.
+
+Everything must come from my database.
+
+8. FREE PHONE / K0 COST
+
+I must also be able to add a phone that I received for free.
+
+Example:
+
+iPhone X
+
+* Acquisition type: Free/Gift
+* Acquisition cost: K0
+* Expected selling price: K2,700
+
+The app should understand that I did not spend money acquiring the phone.
+
+If I later add K300 repair cost:
+
+Total cost = K300
+Expected profit = K2,700 − K300 = K2,400
+
+This must not create fake business cash.
+
+9. TRADE-IN PHONES
+
+I also need an acquisition option called:
+
+* Purchased
+* Free/Gift
+* Trade-in
+* Other
+
+For Trade-in, I should be able to enter the value of what I gave up plus any additional costs.
+
+The system should use that information to calculate the phone’s acquisition/landed cost.
+
+10. ACTUAL SALE PRICE
+
+Do NOT replace my expected selling price when I sell a phone.
+
+Keep both:
+
+Expected Selling Price
+AND
+Actual Selling Price
+
+Example:
+
+Expected selling price = K4,000
+
+If I eventually sell it for K3,800:
+
+Expected selling price remains K4,000.
+
+Actual selling price becomes K3,800.
+
+The app then calculates:
+
+Realized Revenue = K3,800
+
+Realized Gross Profit =
+K3,800 − actual total cost
+
+11. DASHBOARD MUST BE DYNAMIC
+
+The dashboard must show numbers based ONLY on the data I have entered.
+
+For example:
+
+* Business Cash
+* Stock Cost
+* Potential Stock Revenue
+* Potential Profit
+* Phones in Stock
+* Phones Sold
+* Total Revenue
+* Realized Gross Profit
+* Business Expenses
+* Personal Withdrawals
+* Protected Stock Capital
+* Safe-to-Spend Profit
+
+If I have no data, show K0 or an empty state instead of fake numbers.
+
+12. MONEY GUARD
+
+Keep the strict Business Money Guard.
+
+It should calculate:
+
+Safe-to-Spend =
+Business Cash − Protected Stock Capital − Emergency Reserve
+
+If the result is below K0, show:
+
+DO NOT SPEND
+
+If the amount is safe, show:
+
+SAFE TO SPEND
+
+The app must NEVER treat:
+
+* unsold stock
+* expected revenue
+* expected profit
+
+as actual cash.
+
+13. ADD PHONE BUTTON
+
+Make the main “Add Phone” button very easy to find.
+
+When I tap it, I should get a simple form:
+
+Brand
+Model
+Storage
+Color
+Condition
+IMEI/Serial
+Battery Health
+Acquisition Type
+Purchase/Acquisition Price
+Shipping
+Customs
+Repairs
+Accessories
+Other Costs
+Expected Selling Price
+Acquisition Date
+Notes
+
+After I save it, the phone should immediately appear in Inventory and all dashboard calculations should update.
+
+14. ADD MULTIPLE PHONES QUICKLY
+
+I should also have an option to add multiple identical phones quickly.
+
+For example:
+
+Model: iPhone 11
+Quantity: 3
+Total purchase price: K4,500
+Total shipping: K600
+Expected selling price per phone: K4,000
+
+The system should automatically create 3 inventory units and allocate the costs correctly.
+
+15. NO FAKE DATA EVER
+
+The most important rule:
+
+The app must manage my actual business, not demonstrate a fictional business.
+
+Do not put fake phones into the database.
+
+Do not put fake revenue into the dashboard.
+
+Do not put fake profit into the dashboard.
+
+Do not put fake expenses into the dashboard.
+
+If I haven’t entered something, the system should not invent it.
+
+Build the database and calculations so that everything is generated dynamically from the real information I enter.
+
+16. PERSISTENCE
+
+When I close the app and reopen it, my data must still be there.
+
+I should never lose my:
+
+* phones
+* purchase costs
+* shipping
+* expenses
+* sales
+* profits
+* withdrawals
+* business cash
+
+Use persistent database storage.
+
+17. TEST THIS WITH MY REAL STARTING DATA
+
+After implementing the changes, load ONLY these starting phones that I explicitly provided:
+
+3 × iPhone 11
+2 × iPhone X
+
+Total purchase cost:
+K9,212
+
+Total estimated shipping:
+K1,000
+
+Estimated total landed cost:
+K10,212
+
+Do not add any other phones or fake transactions.
+
+Then verify that the dashboard correctly derives its numbers from these records.
+
+The important thing is that these should be stored as actual inventory/business records that I can edit later — not hard-coded demo data.
+
+Build this as a real working business-management system.

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useSaveBusinessSettings } from "@workspace/api-client-react";
+import { useGetBusinessSettings, useSaveBusinessSettings } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -10,9 +10,16 @@ import { Smartphone, Wallet, ArrowRight, ShieldCheck } from "lucide-react";
 export default function Setup() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { data: existingSettings } = useGetBusinessSettings();
   const save = useSaveBusinessSettings();
   const [cash, setCash] = useState("");
   const [phones, setPhones] = useState("");
+
+  useEffect(() => {
+    if (existingSettings && existingSettings.currentPhoneCount > 0) {
+      setPhones(String(existingSettings.currentPhoneCount));
+    }
+  }, [existingSettings]);
 
   const submit = () => {
     const openingCash = Number(cash);

@@ -18,6 +18,16 @@ export interface Product {
   brand?: string | null;
   /** @nullable */
   model?: string | null;
+  /** @nullable */
+  storage?: string | null;
+  /** @nullable */
+  color?: string | null;
+  /** @nullable */
+  condition?: string | null;
+  /** @nullable */
+  imei?: string | null;
+  /** @nullable */
+  batteryHealth?: string | null;
   /** Purchase price in ZMW */
   costPrice: number;
   /** Expected selling price in ZMW; actual sale prices remain on sale items */
@@ -32,6 +42,8 @@ export interface Product {
   tradeValue?: number;
   /** @nullable */
   acquisitionNote?: string | null;
+  /** @nullable */
+  acquisitionDate?: Date | null;
   stockQuantity: number;
   lowStockThreshold: number;
   /** @nullable */

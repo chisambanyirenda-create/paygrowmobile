@@ -39,6 +39,16 @@ export interface Product {
   brand?: string | null;
   /** @nullable */
   model?: string | null;
+  /** @nullable */
+  storage?: string | null;
+  /** @nullable */
+  color?: string | null;
+  /** @nullable */
+  condition?: string | null;
+  /** @nullable */
+  imei?: string | null;
+  /** @nullable */
+  batteryHealth?: string | null;
   /** Purchase price in ZMW */
   costPrice: number;
   /** Expected selling price in ZMW; actual sale prices remain on sale items */
@@ -53,6 +63,8 @@ export interface Product {
   tradeValue?: number;
   /** @nullable */
   acquisitionNote?: string | null;
+  /** @nullable */
+  acquisitionDate?: string | null;
   stockQuantity: number;
   lowStockThreshold: number;
   /** @nullable */
@@ -82,6 +94,11 @@ export interface ProductInput {
   category: string;
   brand?: string;
   model?: string;
+  storage?: string;
+  color?: string;
+  condition?: string;
+  imei?: string;
+  batteryHealth?: string;
   /** @minimum 0 */
   costPrice: number;
   /** @minimum 0 */
@@ -102,6 +119,7 @@ export interface ProductInput {
   /** @minimum 0 */
   tradeValue?: number;
   acquisitionNote?: string;
+  acquisitionDate?: string;
   /** @minimum 0 */
   stockQuantity: number;
   /** @minimum 0 */
@@ -126,6 +144,11 @@ export interface ProductUpdate {
   category?: string;
   brand?: string;
   model?: string;
+  storage?: string;
+  color?: string;
+  condition?: string;
+  imei?: string;
+  batteryHealth?: string;
   /** @minimum 0 */
   costPrice?: number;
   /** @minimum 0 */
@@ -152,6 +175,7 @@ export interface ProductUpdate {
   /** @minimum 0 */
   tradeValue?: number;
   acquisitionNote?: string;
+  acquisitionDate?: string;
 }
 
 export interface BusinessSettings {

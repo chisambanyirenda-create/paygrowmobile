@@ -17,6 +17,11 @@ export const productsTable = pgTable("products", {
   category: text("category").notNull().default("other"),
   brand: text("brand"),
   model: text("model"),
+  storage: text("storage"),
+  color: text("color"),
+  condition: text("condition"),
+  imei: text("imei"),
+  batteryHealth: text("battery_health"),
   costPrice: numeric("cost_price", { precision: 12, scale: 2 })
     .notNull()
     .default("0"),
@@ -32,6 +37,7 @@ export const productsTable = pgTable("products", {
   otherCost: numeric("other_cost", { precision: 12, scale: 2 }).notNull().default("0"),
   tradeValue: numeric("trade_value", { precision: 12, scale: 2 }).notNull().default("0"),
   acquisitionNote: text("acquisition_note"),
+  acquisitionDate: timestamp("acquisition_date"),
   stockQuantity: integer("stock_quantity").notNull().default(0),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(5),
   description: text("description"),
