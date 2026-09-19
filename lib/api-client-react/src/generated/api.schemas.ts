@@ -18,6 +18,16 @@ export interface DeleteResult {
   id: number;
 }
 
+export type ProductAcquisitionType = typeof ProductAcquisitionType[keyof typeof ProductAcquisitionType];
+
+
+export const ProductAcquisitionType = {
+  purchased: 'purchased',
+  free_gift: 'free_gift',
+  trade_in: 'trade_in',
+  other: 'other',
+} as const;
+
 export interface Product {
   id: number;
   name: string;
@@ -31,8 +41,18 @@ export interface Product {
   model?: string | null;
   /** Purchase price in ZMW */
   costPrice: number;
-  /** Sale price in ZMW */
+  /** Expected selling price in ZMW; actual sale prices remain on sale items */
   sellingPrice: number;
+  acquisitionType?: ProductAcquisitionType;
+  purchasePrice?: number;
+  shippingCost?: number;
+  customsCost?: number;
+  repairCost?: number;
+  accessoriesCost?: number;
+  otherCost?: number;
+  tradeValue?: number;
+  /** @nullable */
+  acquisitionNote?: string | null;
   stockQuantity: number;
   lowStockThreshold: number;
   /** @nullable */
@@ -45,6 +65,16 @@ export interface Product {
   updatedAt: string;
 }
 
+export type ProductInputAcquisitionType = typeof ProductInputAcquisitionType[keyof typeof ProductInputAcquisitionType];
+
+
+export const ProductInputAcquisitionType = {
+  purchased: 'purchased',
+  free_gift: 'free_gift',
+  trade_in: 'trade_in',
+  other: 'other',
+} as const;
+
 export interface ProductInput {
   /** @minLength 1 */
   name: string;
@@ -56,6 +86,22 @@ export interface ProductInput {
   costPrice: number;
   /** @minimum 0 */
   sellingPrice: number;
+  acquisitionType?: ProductInputAcquisitionType;
+  /** @minimum 0 */
+  purchasePrice?: number;
+  /** @minimum 0 */
+  shippingCost?: number;
+  /** @minimum 0 */
+  customsCost?: number;
+  /** @minimum 0 */
+  repairCost?: number;
+  /** @minimum 0 */
+  accessoriesCost?: number;
+  /** @minimum 0 */
+  otherCost?: number;
+  /** @minimum 0 */
+  tradeValue?: number;
+  acquisitionNote?: string;
   /** @minimum 0 */
   stockQuantity: number;
   /** @minimum 0 */
@@ -63,6 +109,16 @@ export interface ProductInput {
   description?: string;
   supplierId?: number;
 }
+
+export type ProductUpdateAcquisitionType = typeof ProductUpdateAcquisitionType[keyof typeof ProductUpdateAcquisitionType];
+
+
+export const ProductUpdateAcquisitionType = {
+  purchased: 'purchased',
+  free_gift: 'free_gift',
+  trade_in: 'trade_in',
+  other: 'other',
+} as const;
 
 export interface ProductUpdate {
   name?: string;
@@ -80,6 +136,43 @@ export interface ProductUpdate {
   lowStockThreshold?: number;
   description?: string;
   supplierId?: number;
+  acquisitionType?: ProductUpdateAcquisitionType;
+  /** @minimum 0 */
+  purchasePrice?: number;
+  /** @minimum 0 */
+  shippingCost?: number;
+  /** @minimum 0 */
+  customsCost?: number;
+  /** @minimum 0 */
+  repairCost?: number;
+  /** @minimum 0 */
+  accessoriesCost?: number;
+  /** @minimum 0 */
+  otherCost?: number;
+  /** @minimum 0 */
+  tradeValue?: number;
+  acquisitionNote?: string;
+}
+
+export interface BusinessSettings {
+  setupCompleted: boolean;
+  openingCash: number;
+  currentPhoneCount: number;
+}
+
+export interface BusinessSettingsInput {
+  /** @minimum 0 */
+  openingCash: number;
+  /** @minimum 0 */
+  currentPhoneCount: number;
+}
+
+export interface ResetResult {
+  success: boolean;
+}
+
+export interface ResetBusinessDataInput {
+  confirm: boolean;
 }
 
 export interface Customer {

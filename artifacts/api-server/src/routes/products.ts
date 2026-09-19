@@ -9,6 +9,12 @@ import { eq, ilike, and, lte, or, sql } from "drizzle-orm";
 
 const router = Router();
 
+function acquisitionCost(input: Record<string, unknown>) {
+  const value = (key: string) => Math.max(0, Number(input[key] ?? 0) || 0);
+  const base = input.acquisitionType === "trade_in" ? value("tradeValue") : value("purchasePrice");
+  return base + value("shippingCost") + value("customsCost") + value("repairCost") + value("accessoriesCost") + value("otherCost");
+}
+
 // List products
 router.get("/", async (req, res) => {
   try {
@@ -45,6 +51,15 @@ router.get("/", async (req, res) => {
         model: productsTable.model,
         costPrice: productsTable.costPrice,
         sellingPrice: productsTable.sellingPrice,
+        acquisitionType: productsTable.acquisitionType,
+        purchasePrice: productsTable.purchasePrice,
+        shippingCost: productsTable.shippingCost,
+        customsCost: productsTable.customsCost,
+        repairCost: productsTable.repairCost,
+        accessoriesCost: productsTable.accessoriesCost,
+        otherCost: productsTable.otherCost,
+        tradeValue: productsTable.tradeValue,
+        acquisitionNote: productsTable.acquisitionNote,
         stockQuantity: productsTable.stockQuantity,
         lowStockThreshold: productsTable.lowStockThreshold,
         description: productsTable.description,
@@ -83,6 +98,15 @@ router.get("/low-stock", async (req, res) => {
         model: productsTable.model,
         costPrice: productsTable.costPrice,
         sellingPrice: productsTable.sellingPrice,
+        acquisitionType: productsTable.acquisitionType,
+        purchasePrice: productsTable.purchasePrice,
+        shippingCost: productsTable.shippingCost,
+        customsCost: productsTable.customsCost,
+        repairCost: productsTable.repairCost,
+        accessoriesCost: productsTable.accessoriesCost,
+        otherCost: productsTable.otherCost,
+        tradeValue: productsTable.tradeValue,
+        acquisitionNote: productsTable.acquisitionNote,
         stockQuantity: productsTable.stockQuantity,
         lowStockThreshold: productsTable.lowStockThreshold,
         description: productsTable.description,
@@ -124,6 +148,15 @@ router.get("/:id", async (req, res) => {
         model: productsTable.model,
         costPrice: productsTable.costPrice,
         sellingPrice: productsTable.sellingPrice,
+        acquisitionType: productsTable.acquisitionType,
+        purchasePrice: productsTable.purchasePrice,
+        shippingCost: productsTable.shippingCost,
+        customsCost: productsTable.customsCost,
+        repairCost: productsTable.repairCost,
+        accessoriesCost: productsTable.accessoriesCost,
+        otherCost: productsTable.otherCost,
+        tradeValue: productsTable.tradeValue,
+        acquisitionNote: productsTable.acquisitionNote,
         stockQuantity: productsTable.stockQuantity,
         lowStockThreshold: productsTable.lowStockThreshold,
         description: productsTable.description,
@@ -159,11 +192,11 @@ router.post("/", async (req, res) => {
       res.status(400).json({ error: parsed.error.message });
       return;
     }
-    const [product] = await db
+     const [product] = await db
       .insert(productsTable)
       .values({
         ...parsed.data,
-        costPrice: String(parsed.data.costPrice ?? 0),
+        costPrice: String(acquisitionCost(req.body)),
         sellingPrice: String(parsed.data.sellingPrice ?? 0),
       })
       .returning();
@@ -185,8 +218,11 @@ router.patch("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const updates: Record<string, unknown> = { ...req.body, updatedAt: new Date() };
-    if (updates.costPrice !== undefined)
+    if (Object.keys(req.body).some((key) => ["acquisitionType", "purchasePrice", "shippingCost", "customsCost", "repairCost", "accessoriesCost", "otherCost", "tradeValue"].includes(key))) {
+      updates.costPrice = String(acquisitionCost(req.body));
+    } else if (updates.costPrice !== undefined) {
       updates.costPrice = String(updates.costPrice);
+    }
     if (updates.sellingPrice !== undefined)
       updates.sellingPrice = String(updates.sellingPrice);
 

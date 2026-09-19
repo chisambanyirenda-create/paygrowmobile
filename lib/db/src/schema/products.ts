@@ -23,6 +23,15 @@ export const productsTable = pgTable("products", {
   sellingPrice: numeric("selling_price", { precision: 12, scale: 2 })
     .notNull()
     .default("0"),
+  acquisitionType: text("acquisition_type").notNull().default("purchased"),
+  purchasePrice: numeric("purchase_price", { precision: 12, scale: 2 }).notNull().default("0"),
+  shippingCost: numeric("shipping_cost", { precision: 12, scale: 2 }).notNull().default("0"),
+  customsCost: numeric("customs_cost", { precision: 12, scale: 2 }).notNull().default("0"),
+  repairCost: numeric("repair_cost", { precision: 12, scale: 2 }).notNull().default("0"),
+  accessoriesCost: numeric("accessories_cost", { precision: 12, scale: 2 }).notNull().default("0"),
+  otherCost: numeric("other_cost", { precision: 12, scale: 2 }).notNull().default("0"),
+  tradeValue: numeric("trade_value", { precision: 12, scale: 2 }).notNull().default("0"),
+  acquisitionNote: text("acquisition_note"),
   stockQuantity: integer("stock_quantity").notNull().default(0),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(5),
   description: text("description"),

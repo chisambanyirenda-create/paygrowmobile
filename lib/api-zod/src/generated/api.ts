@@ -33,7 +33,16 @@ export const ListProductsResponseItem = zod.object({
   "brand": zod.string().nullish(),
   "model": zod.string().nullish(),
   "costPrice": zod.number().describe('Purchase price in ZMW'),
-  "sellingPrice": zod.number().describe('Sale price in ZMW'),
+  "sellingPrice": zod.number().describe('Expected selling price in ZMW; actual sale prices remain on sale items'),
+  "acquisitionType": zod.enum(['purchased', 'free_gift', 'trade_in', 'other']).optional(),
+  "purchasePrice": zod.number().optional(),
+  "shippingCost": zod.number().optional(),
+  "customsCost": zod.number().optional(),
+  "repairCost": zod.number().optional(),
+  "accessoriesCost": zod.number().optional(),
+  "otherCost": zod.number().optional(),
+  "tradeValue": zod.number().optional(),
+  "acquisitionNote": zod.string().nullish(),
   "stockQuantity": zod.number(),
   "lowStockThreshold": zod.number(),
   "description": zod.string().nullish(),
@@ -53,6 +62,20 @@ export const createProductBodyCostPriceMin = 0;
 
 export const createProductBodySellingPriceMin = 0;
 
+export const createProductBodyPurchasePriceMin = 0;
+
+export const createProductBodyShippingCostMin = 0;
+
+export const createProductBodyCustomsCostMin = 0;
+
+export const createProductBodyRepairCostMin = 0;
+
+export const createProductBodyAccessoriesCostMin = 0;
+
+export const createProductBodyOtherCostMin = 0;
+
+export const createProductBodyTradeValueMin = 0;
+
 export const createProductBodyStockQuantityMin = 0;
 
 export const createProductBodyLowStockThresholdMin = 0;
@@ -67,6 +90,15 @@ export const CreateProductBody = zod.object({
   "model": zod.string().optional(),
   "costPrice": zod.number().min(createProductBodyCostPriceMin),
   "sellingPrice": zod.number().min(createProductBodySellingPriceMin),
+  "acquisitionType": zod.enum(['purchased', 'free_gift', 'trade_in', 'other']).optional(),
+  "purchasePrice": zod.number().min(createProductBodyPurchasePriceMin).optional(),
+  "shippingCost": zod.number().min(createProductBodyShippingCostMin).optional(),
+  "customsCost": zod.number().min(createProductBodyCustomsCostMin).optional(),
+  "repairCost": zod.number().min(createProductBodyRepairCostMin).optional(),
+  "accessoriesCost": zod.number().min(createProductBodyAccessoriesCostMin).optional(),
+  "otherCost": zod.number().min(createProductBodyOtherCostMin).optional(),
+  "tradeValue": zod.number().min(createProductBodyTradeValueMin).optional(),
+  "acquisitionNote": zod.string().optional(),
   "stockQuantity": zod.number().min(createProductBodyStockQuantityMin),
   "lowStockThreshold": zod.number().min(createProductBodyLowStockThresholdMin).optional(),
   "description": zod.string().optional(),
@@ -81,7 +113,16 @@ export const CreateProductResponse = zod.object({
   "brand": zod.string().nullish(),
   "model": zod.string().nullish(),
   "costPrice": zod.number().describe('Purchase price in ZMW'),
-  "sellingPrice": zod.number().describe('Sale price in ZMW'),
+  "sellingPrice": zod.number().describe('Expected selling price in ZMW; actual sale prices remain on sale items'),
+  "acquisitionType": zod.enum(['purchased', 'free_gift', 'trade_in', 'other']).optional(),
+  "purchasePrice": zod.number().optional(),
+  "shippingCost": zod.number().optional(),
+  "customsCost": zod.number().optional(),
+  "repairCost": zod.number().optional(),
+  "accessoriesCost": zod.number().optional(),
+  "otherCost": zod.number().optional(),
+  "tradeValue": zod.number().optional(),
+  "acquisitionNote": zod.string().nullish(),
   "stockQuantity": zod.number(),
   "lowStockThreshold": zod.number(),
   "description": zod.string().nullish(),
@@ -89,6 +130,49 @@ export const CreateProductResponse = zod.object({
   "supplierName": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get real-business setup status
+ */
+export const GetBusinessSettingsResponse = zod.object({
+  "setupCompleted": zod.boolean(),
+  "openingCash": zod.number(),
+  "currentPhoneCount": zod.number()
+})
+
+
+/**
+ * @summary Save real-business setup
+ */
+export const saveBusinessSettingsBodyOpeningCashMin = 0;
+
+export const saveBusinessSettingsBodyCurrentPhoneCountMin = 0;
+
+
+
+export const SaveBusinessSettingsBody = zod.object({
+  "openingCash": zod.number().min(saveBusinessSettingsBodyOpeningCashMin),
+  "currentPhoneCount": zod.number().min(saveBusinessSettingsBodyCurrentPhoneCountMin)
+})
+
+export const SaveBusinessSettingsResponse = zod.object({
+  "setupCompleted": zod.boolean(),
+  "openingCash": zod.number(),
+  "currentPhoneCount": zod.number()
+})
+
+
+/**
+ * @summary Reset business data after explicit confirmation
+ */
+export const ResetBusinessDataBody = zod.object({
+  "confirm": zod.boolean()
+})
+
+export const ResetBusinessDataResponse = zod.object({
+  "success": zod.boolean()
 })
 
 
@@ -107,7 +191,16 @@ export const GetProductResponse = zod.object({
   "brand": zod.string().nullish(),
   "model": zod.string().nullish(),
   "costPrice": zod.number().describe('Purchase price in ZMW'),
-  "sellingPrice": zod.number().describe('Sale price in ZMW'),
+  "sellingPrice": zod.number().describe('Expected selling price in ZMW; actual sale prices remain on sale items'),
+  "acquisitionType": zod.enum(['purchased', 'free_gift', 'trade_in', 'other']).optional(),
+  "purchasePrice": zod.number().optional(),
+  "shippingCost": zod.number().optional(),
+  "customsCost": zod.number().optional(),
+  "repairCost": zod.number().optional(),
+  "accessoriesCost": zod.number().optional(),
+  "otherCost": zod.number().optional(),
+  "tradeValue": zod.number().optional(),
+  "acquisitionNote": zod.string().nullish(),
   "stockQuantity": zod.number(),
   "lowStockThreshold": zod.number(),
   "description": zod.string().nullish(),
@@ -133,6 +226,20 @@ export const updateProductBodyStockQuantityMin = 0;
 
 export const updateProductBodyLowStockThresholdMin = 0;
 
+export const updateProductBodyPurchasePriceMin = 0;
+
+export const updateProductBodyShippingCostMin = 0;
+
+export const updateProductBodyCustomsCostMin = 0;
+
+export const updateProductBodyRepairCostMin = 0;
+
+export const updateProductBodyAccessoriesCostMin = 0;
+
+export const updateProductBodyOtherCostMin = 0;
+
+export const updateProductBodyTradeValueMin = 0;
+
 
 
 export const UpdateProductBody = zod.object({
@@ -146,7 +253,16 @@ export const UpdateProductBody = zod.object({
   "stockQuantity": zod.number().min(updateProductBodyStockQuantityMin).optional(),
   "lowStockThreshold": zod.number().min(updateProductBodyLowStockThresholdMin).optional(),
   "description": zod.string().optional(),
-  "supplierId": zod.number().optional()
+  "supplierId": zod.number().optional(),
+  "acquisitionType": zod.enum(['purchased', 'free_gift', 'trade_in', 'other']).optional(),
+  "purchasePrice": zod.number().min(updateProductBodyPurchasePriceMin).optional(),
+  "shippingCost": zod.number().min(updateProductBodyShippingCostMin).optional(),
+  "customsCost": zod.number().min(updateProductBodyCustomsCostMin).optional(),
+  "repairCost": zod.number().min(updateProductBodyRepairCostMin).optional(),
+  "accessoriesCost": zod.number().min(updateProductBodyAccessoriesCostMin).optional(),
+  "otherCost": zod.number().min(updateProductBodyOtherCostMin).optional(),
+  "tradeValue": zod.number().min(updateProductBodyTradeValueMin).optional(),
+  "acquisitionNote": zod.string().optional()
 })
 
 export const UpdateProductResponse = zod.object({
@@ -157,7 +273,16 @@ export const UpdateProductResponse = zod.object({
   "brand": zod.string().nullish(),
   "model": zod.string().nullish(),
   "costPrice": zod.number().describe('Purchase price in ZMW'),
-  "sellingPrice": zod.number().describe('Sale price in ZMW'),
+  "sellingPrice": zod.number().describe('Expected selling price in ZMW; actual sale prices remain on sale items'),
+  "acquisitionType": zod.enum(['purchased', 'free_gift', 'trade_in', 'other']).optional(),
+  "purchasePrice": zod.number().optional(),
+  "shippingCost": zod.number().optional(),
+  "customsCost": zod.number().optional(),
+  "repairCost": zod.number().optional(),
+  "accessoriesCost": zod.number().optional(),
+  "otherCost": zod.number().optional(),
+  "tradeValue": zod.number().optional(),
+  "acquisitionNote": zod.string().nullish(),
   "stockQuantity": zod.number(),
   "lowStockThreshold": zod.number(),
   "description": zod.string().nullish(),
@@ -192,7 +317,16 @@ export const GetLowStockProductsResponseItem = zod.object({
   "brand": zod.string().nullish(),
   "model": zod.string().nullish(),
   "costPrice": zod.number().describe('Purchase price in ZMW'),
-  "sellingPrice": zod.number().describe('Sale price in ZMW'),
+  "sellingPrice": zod.number().describe('Expected selling price in ZMW; actual sale prices remain on sale items'),
+  "acquisitionType": zod.enum(['purchased', 'free_gift', 'trade_in', 'other']).optional(),
+  "purchasePrice": zod.number().optional(),
+  "shippingCost": zod.number().optional(),
+  "customsCost": zod.number().optional(),
+  "repairCost": zod.number().optional(),
+  "accessoriesCost": zod.number().optional(),
+  "otherCost": zod.number().optional(),
+  "tradeValue": zod.number().optional(),
+  "acquisitionNote": zod.string().nullish(),
   "stockQuantity": zod.number(),
   "lowStockThreshold": zod.number(),
   "description": zod.string().nullish(),

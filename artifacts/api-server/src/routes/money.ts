@@ -6,6 +6,7 @@ import {
   saleItemsTable,
   salesTable,
   withdrawalsTable,
+  businessSettingsTable,
 } from "@workspace/db";
 import { desc, sql, eq } from "drizzle-orm";
 
@@ -48,6 +49,7 @@ async function getMoneySummary() {
   const [withdrawals] = await db.select({
     total: sql<number>`COALESCE(SUM(${withdrawalsTable.amount}), 0)::numeric`,
   }).from(withdrawalsTable);
+  const [settings] = await db.select({ openingCash: businessSettingsTable.openingCash }).from(businessSettingsTable).orderBy(businessSettingsTable.id).limit(1);
 
   const stockCost = asNumber(inventory.stockCost);
   const stockValue = asNumber(inventory.stockValue);
@@ -55,7 +57,8 @@ async function getMoneySummary() {
   const cogs = asNumber(sales.cogs);
   const operatingExpenses = asNumber(expenses.total);
   const personalWithdrawals = asNumber(withdrawals.total);
-  const cashAvailable = revenue - cogs - operatingExpenses - personalWithdrawals;
+  const openingCash = asNumber(settings?.openingCash);
+  const cashAvailable = openingCash + revenue - cogs - operatingExpenses - personalWithdrawals;
 
   return {
     businessCapital: stockCost + cashAvailable,
@@ -69,6 +72,7 @@ async function getMoneySummary() {
     realizedGrossProfit: asNumber(sales.grossProfit),
     operatingExpenses,
     personalWithdrawals,
+    openingCash,
     phonesInStock: inventory.phonesInStock,
     phonesSold: sold.phonesSold,
   };

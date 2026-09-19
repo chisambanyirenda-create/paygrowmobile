@@ -5,6 +5,7 @@
  * MobiTrack - Phone & Accessory Business Management API for Zambia
  * OpenAPI spec version: 0.1.0
  */
+import type { ProductUpdateAcquisitionType } from './productUpdateAcquisitionType';
 
 export interface ProductUpdate {
   name?: string;
@@ -22,4 +23,20 @@ export interface ProductUpdate {
   lowStockThreshold?: number;
   description?: string;
   supplierId?: number;
+  acquisitionType?: ProductUpdateAcquisitionType;
+  /** @minimum 0 */
+  purchasePrice?: number;
+  /** @minimum 0 */
+  shippingCost?: number;
+  /** @minimum 0 */
+  customsCost?: number;
+  /** @minimum 0 */
+  repairCost?: number;
+  /** @minimum 0 */
+  accessoriesCost?: number;
+  /** @minimum 0 */
+  otherCost?: number;
+  /** @minimum 0 */
+  tradeValue?: number;
+  acquisitionNote?: string;
 }

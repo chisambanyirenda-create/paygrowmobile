@@ -8,6 +8,7 @@ import expensesRouter from "./expenses";
 import dashboardRouter from "./dashboard";
 import anthropicRouter from "./anthropic/index";
 import moneyRouter from "./money";
+import businessRouter from "./business";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use("/expenses", expensesRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/anthropic", anthropicRouter);
 router.use("/money", moneyRouter);
+router.use("/business", businessRouter);
 
 export default router;

@@ -14,6 +14,8 @@ import AIAdvisor from '@/pages/ai-advisor';
 import Money from '@/pages/money';
 import Growth from '@/pages/growth';
 import Analytics from '@/pages/analytics';
+import Setup from '@/pages/setup';
+import { useGetBusinessSettings } from "@workspace/api-client-react";
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 
 const queryClient = new QueryClient({
@@ -26,6 +28,9 @@ const queryClient = new QueryClient({
 });
 
 function Router() {
+  const { data: settings, isLoading } = useGetBusinessSettings();
+  if (isLoading) return <div className="min-h-screen bg-[#050b16]" />;
+  if (!settings?.setupCompleted) return <Setup />;
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
@@ -40,6 +45,7 @@ function Router() {
       <Route path="/growth" component={Growth} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/settings" component={Settings} />
+      <Route path="/setup" component={Setup} />
       <Route component={NotFound} />
     </Switch>
   );

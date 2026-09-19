@@ -533,8 +533,8 @@ function PhoneCatalogDialog({ onSelect }: { onSelect: (sel: CatalogSelection) =>
                     </p>
                     <p className="text-xs mt-1">
                       {pickedVariant.priceAdder > 0
-                        ? `Add ${formatZMW(pickedVariant.priceAdder)} to your base cost & selling price for this variant.`
-                        : "Enter your base cost and selling price in the next step."}
+                        ? `Add ${formatZMW(pickedVariant.priceAdder)} to your entered acquisition costs for this variant.`
+                        : "Enter your real acquisition costs and expected selling price in the next step."}
                     </p>
                   </div>
                 )}
@@ -570,6 +570,15 @@ const productSchema = z.object({
   model: z.string().optional(),
   costPrice: z.coerce.number().min(0),
   sellingPrice: z.coerce.number().min(0),
+  acquisitionType: z.enum(["purchased", "free_gift", "trade_in", "other"]),
+  purchasePrice: z.coerce.number().min(0),
+  shippingCost: z.coerce.number().min(0),
+  customsCost: z.coerce.number().min(0),
+  repairCost: z.coerce.number().min(0),
+  accessoriesCost: z.coerce.number().min(0),
+  otherCost: z.coerce.number().min(0),
+  tradeValue: z.coerce.number().min(0),
+  acquisitionNote: z.string().optional(),
   stockQuantity: z.coerce.number().min(0),
   lowStockThreshold: z.coerce.number().min(0),
   supplierId: z.coerce.number().optional(),
@@ -586,6 +595,18 @@ function ProductFormFields({
   suppliers: { id: number; name: string }[] | undefined;
   catalogPhone?: { phone: CatalogPhone; variant: StorageVariant } | null;
 }) {
+  const values = form.watch();
+  const additional = (values.shippingCost || 0) + (values.customsCost || 0) + (values.repairCost || 0) + (values.accessoriesCost || 0) + (values.otherCost || 0);
+  const totalCost = (values.acquisitionType === "trade_in" ? (values.tradeValue || 0) : (values.purchasePrice || 0)) + additional;
+  const expectedProfit = (values.sellingPrice || 0) - totalCost;
+  const amountFields: Array<[keyof ProductFormValues, string]> = [
+    ["purchasePrice", "Purchase price"],
+    ["shippingCost", "Shipping"],
+    ["customsCost", "Customs / import costs"],
+    ["repairCost", "Repairs"],
+    ["accessoriesCost", "Accessories"],
+    ["otherCost", "Other costs"],
+  ];
   return (
     <div className="space-y-4">
       {/* Catalog photo banner */}
@@ -658,21 +679,50 @@ function ProductFormFields({
           </FormItem>
         )} />
 
-        <FormField control={form.control} name="costPrice" render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Cost Price (ZMW) *</FormLabel>
-            <FormControl><Input type="number" step="0.01" {...field} className="bg-background font-mono" /></FormControl>
-            <FormMessage />
+        <FormField control={form.control} name="acquisitionType" render={({ field }) => (
+          <FormItem className="col-span-2">
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">How did you get this phone? *</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
+              <FormControl><SelectTrigger className="bg-background"><SelectValue /></SelectTrigger></FormControl>
+              <SelectContent>
+                <SelectItem value="purchased">Purchased</SelectItem>
+                <SelectItem value="free_gift">Free / Gift</SelectItem>
+                <SelectItem value="trade_in">Trade-in</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
           </FormItem>
         )} />
 
+        {values.acquisitionType === "trade_in" ? (
+          <FormField control={form.control} name="tradeValue" render={({ field }) => (
+            <FormItem className="col-span-2">
+              <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Value given up in trade (ZMW)</FormLabel>
+              <FormControl><Input type="number" step="0.01" {...field} className="bg-background font-mono" /></FormControl>
+            </FormItem>
+          )} />
+        ) : amountFields.map(([name, label]) => (
+          <FormField key={name} control={form.control} name={name} render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">{label} (ZMW)</FormLabel>
+              <FormControl><Input type="number" step="0.01" {...field} className="bg-background font-mono" /></FormControl>
+            </FormItem>
+          )} />
+        ))}
+
         <FormField control={form.control} name="sellingPrice" render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Selling Price (ZMW) *</FormLabel>
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Expected selling price (ZMW)</FormLabel>
             <FormControl><Input type="number" step="0.01" {...field} className="bg-background font-mono" /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+          <p className="text-muted-foreground">Transparent calculation</p>
+          <p className="font-mono text-white">Total actual cost: {formatZMW(totalCost)}</p>
+          <p className={cn("font-mono font-bold", expectedProfit >= 0 ? "text-emerald-400" : "text-red-400")}>Expected profit: {formatZMW(expectedProfit)}</p>
+          <p className="text-[11px] text-muted-foreground mt-1">Cash invested is separate from potential selling value. Actual sale price is recorded only when sold.</p>
+        </div>
 
         <FormField control={form.control} name="stockQuantity" render={({ field }) => (
           <FormItem>
@@ -705,6 +755,12 @@ function ProductFormFields({
             <FormMessage />
           </FormItem>
         )} />
+        <FormField control={form.control} name="acquisitionNote" render={({ field }) => (
+          <FormItem className="col-span-2">
+            <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">Acquisition notes</FormLabel>
+            <FormControl><Input {...field} placeholder="Gift source, trade details, or other context" className="bg-background" /></FormControl>
+          </FormItem>
+        )} />
       </div>
     </div>
   );
@@ -733,11 +789,11 @@ export default function Products() {
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, stockQuantity:0, lowStockThreshold:3 },
+    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, acquisitionType:"purchased", purchasePrice:0, shippingCost:0, customsCost:0, repairCost:0, accessoriesCost:0, otherCost:0, tradeValue:0, acquisitionNote:"", stockQuantity:0, lowStockThreshold:3 },
   });
   const editForm = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, stockQuantity:0, lowStockThreshold:3 },
+    defaultValues: { name:"", sku:"", category:"phones", brand:"", model:"", costPrice:0, sellingPrice:0, acquisitionType:"purchased", purchasePrice:0, shippingCost:0, customsCost:0, repairCost:0, accessoriesCost:0, otherCost:0, tradeValue:0, acquisitionNote:"", stockQuantity:0, lowStockThreshold:3 },
   });
 
   // Accessories Catalog → pre-fill form + open dialog
@@ -749,8 +805,9 @@ export default function Products() {
       model: "",
       category: "accessories",
       sku: "",
-      costPrice: variant.priceAdder,
-      sellingPrice: variant.priceAdder,
+      costPrice: 0,
+      sellingPrice: 0,
+      acquisitionType: "purchased", purchasePrice: 0, shippingCost: 0, customsCost: 0, repairCost: 0, accessoriesCost: 0, otherCost: 0, tradeValue: 0, acquisitionNote: "",
       stockQuantity: 0,
       lowStockThreshold: 5,
     });
@@ -768,8 +825,9 @@ export default function Products() {
       model: phone.model,
       category: "phones",
       sku: "",
-      costPrice: variant.priceAdder,       // suggested base = price adder as hint
-      sellingPrice: variant.priceAdder,
+      costPrice: 0,
+      sellingPrice: 0,
+      acquisitionType: "purchased", purchasePrice: 0, shippingCost: 0, customsCost: 0, repairCost: 0, accessoriesCost: 0, otherCost: 0, tradeValue: 0, acquisitionNote: "",
       stockQuantity: 0,
       lowStockThreshold: 3,
     });
@@ -778,7 +836,9 @@ export default function Products() {
   };
 
   const onCreateSubmit = (data: ProductFormValues) => {
-    createProduct.mutate({ data }, {
+    const cost = data.acquisitionType === "trade_in" ? data.tradeValue : data.purchasePrice;
+    const totalCost = cost + data.shippingCost + data.customsCost + data.repairCost + data.accessoriesCost + data.otherCost;
+    createProduct.mutate({ data: { ...data, costPrice: totalCost } }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
         setIsCreateOpen(false);
@@ -792,7 +852,9 @@ export default function Products() {
 
   const onEditSubmit = (data: ProductFormValues) => {
     if (!editingProduct) return;
-    updateProduct.mutate({ id: editingProduct.id, data }, {
+    const cost = data.acquisitionType === "trade_in" ? data.tradeValue : data.purchasePrice;
+    const totalCost = cost + data.shippingCost + data.customsCost + data.repairCost + data.accessoriesCost + data.otherCost;
+    updateProduct.mutate({ id: editingProduct.id, data: { ...data, costPrice: totalCost } }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
         setEditingProduct(null);
@@ -806,6 +868,10 @@ export default function Products() {
       name: product.name, sku: product.sku || "", category: product.category,
       brand: product.brand || "", model: product.model || "",
       costPrice: product.costPrice, sellingPrice: product.sellingPrice,
+      acquisitionType: (product.acquisitionType as ProductFormValues["acquisitionType"]) || "purchased",
+      purchasePrice: product.purchasePrice || 0, shippingCost: product.shippingCost || 0, customsCost: product.customsCost || 0,
+      repairCost: product.repairCost || 0, accessoriesCost: product.accessoriesCost || 0, otherCost: product.otherCost || 0,
+      tradeValue: product.tradeValue || 0, acquisitionNote: product.acquisitionNote || "",
       stockQuantity: product.stockQuantity, lowStockThreshold: product.lowStockThreshold,
       supplierId: product.supplierId || undefined,
     });
@@ -943,7 +1009,7 @@ export default function Products() {
                   <TableHead className="w-[300px] text-xs uppercase tracking-wider text-muted-foreground font-bold">Product</TableHead>
                   <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-bold">Category</TableHead>
                   <TableHead className="text-right text-xs uppercase tracking-wider text-muted-foreground font-bold">Cost Price</TableHead>
-                  <TableHead className="text-right text-xs uppercase tracking-wider text-muted-foreground font-bold">Selling Price</TableHead>
+                  <TableHead className="text-right text-xs uppercase tracking-wider text-muted-foreground font-bold">Expected Sale</TableHead>
                   <TableHead className="text-right text-xs uppercase tracking-wider text-muted-foreground font-bold">Margin</TableHead>
                   <TableHead className="text-center text-xs uppercase tracking-wider text-muted-foreground font-bold">Stock</TableHead>
                   <TableHead className="w-[100px]"></TableHead>

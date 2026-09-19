@@ -26,6 +26,8 @@ tags:
     description: Dashboard analytics and summaries
   - name: money
     description: Business capital, cash flow, and withdrawals
+  - name: business
+    description: Real-business setup and data reset controls
 
 paths:
   /healthz:
@@ -86,6 +88,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Product"
+
+  /business/settings:
+    get:
+      operationId: getBusinessSettings
+      tags: [business]
+      summary: Get real-business setup status
+      responses:
+        "200":
+          description: Business setup settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSettings"
+    put:
+      operationId: saveBusinessSettings
+      tags: [business]
+      summary: Save real-business setup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessSettingsInput"
+      responses:
+        "200":
+          description: Saved settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSettings"
+
+  /business/reset:
+    post:
+      operationId: resetBusinessData
+      tags: [business]
+      summary: Reset business data after explicit confirmation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetBusinessDataInput"
+      responses:
+        "200":
+          description: Reset completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetResult"
+        "400":
+          description: Confirmation required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /products/{id}:
     get:
@@ -875,7 +932,26 @@ components:
           description: Purchase price in ZMW
         sellingPrice:
           type: number
-          description: Sale price in ZMW
+          description: Expected selling price in ZMW; actual sale prices remain on sale items
+        acquisitionType:
+          type: string
+          enum: [purchased, free_gift, trade_in, other]
+        purchasePrice:
+          type: number
+        shippingCost:
+          type: number
+        customsCost:
+          type: number
+        repairCost:
+          type: number
+        accessoriesCost:
+          type: number
+        otherCost:
+          type: number
+        tradeValue:
+          type: number
+        acquisitionNote:
+          type: ["string", "null"]
         stockQuantity:
           type: integer
         lowStockThreshold:
@@ -923,6 +999,32 @@ components:
         sellingPrice:
           type: number
           minimum: 0
+        acquisitionType:
+          type: string
+          enum: [purchased, free_gift, trade_in, other]
+        purchasePrice:
+          type: number
+          minimum: 0
+        shippingCost:
+          type: number
+          minimum: 0
+        customsCost:
+          type: number
+          minimum: 0
+        repairCost:
+          type: number
+          minimum: 0
+        accessoriesCost:
+          type: number
+          minimum: 0
+        otherCost:
+          type: number
+          minimum: 0
+        tradeValue:
+          type: number
+          minimum: 0
+        acquisitionNote:
+          type: string
         stockQuantity:
           type: integer
           minimum: 0
@@ -938,6 +1040,7 @@ components:
         - category
         - costPrice
         - sellingPrice
+
         - stockQuantity
 
     ProductUpdate:
@@ -969,6 +1072,68 @@ components:
           type: string
         supplierId:
           type: integer
+        acquisitionType:
+          type: string
+          enum: [purchased, free_gift, trade_in, other]
+        purchasePrice:
+          type: number
+          minimum: 0
+        shippingCost:
+          type: number
+          minimum: 0
+        customsCost:
+          type: number
+          minimum: 0
+        repairCost:
+          type: number
+          minimum: 0
+        accessoriesCost:
+          type: number
+          minimum: 0
+        otherCost:
+          type: number
+          minimum: 0
+        tradeValue:
+          type: number
+          minimum: 0
+        acquisitionNote:
+          type: string
+
+    BusinessSettings:
+      type: object
+      properties:
+        setupCompleted:
+          type: boolean
+        openingCash:
+          type: number
+        currentPhoneCount:
+          type: integer
+      required: [setupCompleted, openingCash, currentPhoneCount]
+
+    BusinessSettingsInput:
+      type: object
+      properties:
+        openingCash:
+          type: number
+          minimum: 0
+        currentPhoneCount:
+          type: integer
+          minimum: 0
+      required: [openingCash, currentPhoneCount]
+
+    ResetResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
+
+    ResetBusinessDataInput:
+      type: object
+      properties:
+        confirm:
+          type: boolean
+      required: [confirm]
 
     # ── Customer ───────────────────────────────────────────
     Customer:

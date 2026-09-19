@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useResetBusinessData } from "@workspace/api-client-react";
 import { Save, Building2, FileText, Phone, Mail, MapPin, Hash, Percent, RefreshCw } from "lucide-react";
 
 interface BusinessSettings {
@@ -21,16 +22,16 @@ interface BusinessSettings {
 }
 
 const DEFAULTS: BusinessSettings = {
-  businessName: "MobiTrack",
-  tagline: "Your trusted phone & accessories store",
-  ownerName: "A. Kamanga",
-  phone: "+260 977 000000",
-  email: "info@mobitrack.zm",
-  address: "Cairo Road",
-  city: "Lusaka, Zambia",
+  businessName: "",
+  tagline: "",
+  ownerName: "",
+  phone: "",
+  email: "",
+  address: "",
+  city: "",
   zraTin: "",
-  taxRate: 16,
-  receiptFooter: "Thank you for your business! Returns accepted within 7 days with receipt.",
+  taxRate: 0,
+  receiptFooter: "",
   currency: "ZMW",
 };
 
@@ -72,6 +73,7 @@ export default function Settings() {
   const [settings, setSettings] = useState<BusinessSettings>(loadSettings);
   const [isDirty, setIsDirty] = useState(false);
   const { toast } = useToast();
+  const resetBusiness = useResetBusinessData();
 
   const update = (key: keyof BusinessSettings, value: string | number) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -95,6 +97,18 @@ export default function Settings() {
       setIsDirty(false);
       toast({ title: "Settings reset to defaults" });
     }
+  };
+
+  const resetBusinessData = () => {
+    if (!confirm("This permanently deletes products, sales, expenses, customers, suppliers, withdrawals, and setup data. Continue?")) return;
+    if (!confirm("Final confirmation: reset the business database to an empty real-data state?")) return;
+    resetBusiness.mutate({ data: { confirm: true } }, {
+      onSuccess: () => {
+        toast({ title: "Business data reset", description: "The next screen will start the real-business setup again." });
+        window.location.href = `${import.meta.env.BASE_URL}setup`;
+      },
+      onError: () => toast({ title: "Could not reset business data", variant: "destructive" }),
+    });
   };
 
   return (
@@ -256,22 +270,8 @@ export default function Settings() {
                 <p className="text-center text-muted-foreground text-[10px]">{settings.address}, {settings.city}</p>
                 {settings.zraTin && <p className="text-center text-muted-foreground text-[10px]">TIN: {settings.zraTin}</p>}
                 <div className="border-t border-dashed border-white/20 my-2"></div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Samsung Galaxy A15</span><span>K 2,100.00</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>USB-C Cable ×2</span><span>K 160.00</span>
-                </div>
+                 <p className="text-center text-muted-foreground py-5">No sale selected</p>
                 <div className="border-t border-dashed border-white/20 my-2"></div>
-                <div className="flex justify-between font-bold text-white">
-                  <span>TOTAL</span><span>K 2,260.00</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground text-[10px]">
-                  <span>Payment: Cash</span><span>K 3,000.00</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground text-[10px]">
-                  <span>Change</span><span>K 740.00</span>
-                </div>
                 <div className="border-t border-dashed border-white/20 my-2"></div>
                 <p className="text-center text-muted-foreground text-[10px] leading-relaxed">{settings.receiptFooter}</p>
               </div>
@@ -298,6 +298,18 @@ export default function Settings() {
             </div>
           </div>
         </div>
+
+        <Section title="Data Safety" icon={RefreshCw}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-bold text-white">Reset business data</p>
+              <p className="text-xs text-muted-foreground mt-1">Use this only if the current records are demo data. It permanently clears business records and returns to real-business setup.</p>
+            </div>
+            <Button variant="outline" className="border-red-500/30 text-red-300 hover:bg-red-500/10" onClick={resetBusinessData} disabled={resetBusiness.isPending}>
+              {resetBusiness.isPending ? "Resetting…" : "Reset to empty business"}
+            </Button>
+          </div>
+        </Section>
 
       </div>
     </Layout>
